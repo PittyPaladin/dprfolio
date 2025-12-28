@@ -1,0 +1,9 @@
+<!-- {{ if not (.Param "hideMadeWithLine") }} * </a>{{ end }} -->
+
+<footer>
+  <hr>
+
+  {{ if .Site.Copyright }}
+    <p>{{ .Site.Copyright | safeHTML }}</p>
+  {{ end }}
+</footer>

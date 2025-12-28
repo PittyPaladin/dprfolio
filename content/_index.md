@@ -1,0 +1,10 @@
++++
+title = "Home"
+menu = "main"
+weight = 1
++++
+
+
+Hello there! My name is David Pérez, and this is my personal website. You can find here some of the projects and ideas I come up in my spare time. I conceive this website as a showcase of my abilities, my profession, and what I enjoy doing. So yeah, the content tends to be engineering-related.
+
+If you want to know more about me and my professional experience, head on to the [About](/about/) section. If you are curious about the projects I post, go to the [Blog](/blog/) section.

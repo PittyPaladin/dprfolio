@@ -1,0 +1,30 @@
+<!-- <a href="{{ "" | relURL }}" class="title">
+  <h1>{{ .Site.Title }}</h1>
+</a>
+<nav>{{- partial "nav.html" . -}}</nav> -->
+
+<div class="site-header">
+  <a href="{{ "" | relURL }}" class="title">
+    <h1>{{ .Site.Title }}</h1>
+  </a>
+  <nav>{{- partial "nav.html" . -}}</nav>
+</div>
+
+<style>
+.site-header {
+  border: 1px solid currentColor;
+  padding: 1rem;
+  margin-bottom: 2rem; /* space from page content */
+  text-align: center;
+}
+
+.title:hover {
+  text-decoration: none;
+}
+
+
+.title h1 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+</style>
