@@ -67,8 +67,49 @@ The capabilities for the M9 GNSS receiver driver are the following:
 2. Communication with the receiver using the UBX protocol only.
 3. Configuration of the receiver using the new interface defined in §5 of the [Interface Document](https://www.u-blox.com/sites/default/files/u-blox-M9-SPG-4.04_InterfaceDescription_UBX-21022436.pdf).
 
+![alt text](m9state_trans.drawio.png "Title")
+
 [^2]: The caller program (the one upstream the GNSS driver) does not control power shutdown to the receiver. In a real deployment it should. After powering up the receiver it should wait a few seconds for it to wake up and then go to PBIT mode by calling the main `Run` method.
 
 ### Scaffolding
 
-I'm using an object oriented approach. There's a `GNSSDriver` class that encapsulates all attributes it may have and provides all the public methods needed to use it. In Python there's no such thing as "public" and "private" methods as in C++. Everything is public. Still, I like to make the differentiation in the comments (some people add underscores to indicate it).
+I'm using an object oriented approach. There's a `GNSSDriver` class that encapsulates all attributes it may have and provides all the public methods needed to use it. In Python there's no such thing as "public" and "private" methods/attributes as in C++. Everything is public. Still, I like to make the differentiation in the comments (some people add underscores to indicate it) with:
+
+```python
+# Public member functions
+# ---------------------------------------------
+```
+
+and
+
+```python
+# Private member functions
+# ---------------------------------------------
+```
+
+In addition to that, even though it's not needed by the language, I mimic C++ in the sense that all attributes used anywhere in the class are declared beforehand in the `__init__` method. This way, all attributes that could exist are easily identifiable and default initialized in one same place. They are all treated as private, in the sense that obtaining them should require a getter or a setter to modify their value.
+
+#### Class attributes
+
+Rather than copy pasting the typical UML class diagram for `GNSSDriver`, it makes more sense to explain the class attributes as groups, and elaborate on the purpose of each group. Going into the specific thing a variable does in that group overcomplicates the explanation. Besides, for sure you would do it in differently (better).
+
+Block of class attributes used for:
+
+1. USB connectivity-related variables.
+2. Circular buffer: for RX message reception. Messages are taken from a receive queue[^3] and input into a message buffer, ready to be processed.
+3. Pending commands: all commands for which the driver could ask something from the RX. They are marked "pending" until the response actually comes.
+4. RX internal data: internal data we know from the RX, each variable updated in a different operational mode in no particular order. But at least all RX info is packed here.
+5. Analytics: for tracking count of checksum errors and worst case execution times.
+6. Driver's Finite State Machine (FSM): self-explanatory.
+7. The Config Handler: internal data of the piece of code in charge of reading, checking and updating RX configuration as desired. It's complicated and will have its own blog entry later on.
+8. Internal variables for BIT: I will explain it later, but the BIT (Built-In Test) is a set of checks that IBIT, PBIT and IBIT have in common. It is not a mode in of itself.
+9. Internal variables for PBIT: also includes the "ascfg", or *Application-Specific Config*, which is a dictionary with all configuration values that differ from the defaults declared in the ICD and need to be configured into the RX.
+10. Internal variables for CBIT: also includes the "defcfg", or *Default Config*, which is a dictionary with *all* configuration values (minus application-specific) declared in the ICD and the default value they should be having in memory. Used to check no external entity changed them.
+11. Internal variables for IBIT.
+12. Internal variables for Operational mode.
+
+<!-- #### Class methods
+ -->
+
+
+[^3]: Just like (actually mimicking) a queue filled by a DMA peripheral, in order to avoid processing messages by interruption. This was actually the approach used with the STM32 prior to pivoting into PC+USB+Python. Due to the slow rate messaging, interruption could have worked fine, but since DMA is present, why not use it?
