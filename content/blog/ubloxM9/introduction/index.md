@@ -34,7 +34,7 @@ Daniel picked the LoRaWAN receiver/emitter. He plans to write a blog about his v
 
 I had past work experience with high-end GNSS receivers from [Septentrio](https://www.septentrio.com/en), the [MosaicX5](https://www.septentrio.com/en/products/gnss-receivers/gnss-receiver-modules/mosaic-x5-devkit) in particular, and I always wanted to explore the products of its main competitor, [Ublox](https://www.u-blox.com/en). Not only that, but see how well a ~40€ low-end standard receiver would fare (as of today MosaicX5 are ~700€ and high-end Ublox F10 are ~250€, outside my budget). I started searching the wide range of low-cost positioning products Ublox has, and settled for the NEO-M9N. Mainly because of the fact that Sparkfun has made a decently priced [breakout board](https://www.sparkfun.com/sparkfun-gps-breakout-neo-m9n-sma-qwiic.html) for $70, thus liberating me from buying Ublox's expensive development kit and still having a ready-to-use SMA connection for the antenna and a USB-C to interface with the chip.
 
-![GPS-17285](GPS-17285.png) # FIXME
+![GPS-17285](GPS-17285.png)
 
 
 I'm going to be honest: I bought the NEO-M9N because it was the cheapest standard precision receiver that Sparkfun had in store with a plug-and-play USB-C. For a battery operated system the ultra-low power M10S would have ben a better option. I just wanted to get started talking to the receiver and figuring how it works. Which brings me to its Interface Control Document (ICD) and Graphical User Interface (GUI).

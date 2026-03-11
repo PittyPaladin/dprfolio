@@ -56,7 +56,7 @@ In other words, if you want some future-proofness to your code, use the new conf
 
 You can make things as complicated as you want. That applies particularly to GNSS receiver drivers: simple communication parsing NMEA messages and using the default configuration is very easy to do. If you want a more robust driver that handles several operational modes, handles faults and acts upon them, in addition to apply your application-specific config, then that's another story. The scope of the project I'm presenting to you is this second type. As the reader will see, the driver is also oriented towards energy saving.
 
-The capabilities for the M9 GNSS receiver driver are the following:
+The capabilities for the M9 GNSS driver are the following:
 
 1. Full operational modes
    1. Powerup Built-In Test (**PBIT**): battery of tests that run when starting up the driver[^2]. Also loads the receiver with application-specific configuration.
@@ -95,21 +95,38 @@ Rather than copy pasting the typical UML class diagram for `GNSSDriver`, it make
 
 Block of class attributes used for:
 
-1. USB connectivity-related variables.
-2. Circular buffer: for RX message reception. Messages are taken from a receive queue[^3] and input into a message buffer, ready to be processed.
-3. Pending commands: all commands for which the driver could ask something from the RX. They are marked "pending" until the response actually comes.
-4. RX internal data: internal data we know from the RX, each variable updated in a different operational mode in no particular order. But at least all RX info is packed here.
-5. Analytics: for tracking count of checksum errors and worst case execution times.
-6. Driver's Finite State Machine (FSM): self-explanatory.
-7. The Config Handler: internal data of the piece of code in charge of reading, checking and updating RX configuration as desired. It's complicated and will have its own blog entry later on.
-8. Internal variables for BIT: I will explain it later, but the BIT (Built-In Test) is a set of checks that IBIT, PBIT and IBIT have in common. It is not a mode in of itself.
-9. Internal variables for PBIT: also includes the "ascfg", or *Application-Specific Config*, which is a dictionary with all configuration values that differ from the defaults declared in the ICD and need to be configured into the RX.
-10. Internal variables for CBIT: also includes the "defcfg", or *Default Config*, which is a dictionary with *all* configuration values (minus application-specific) declared in the ICD and the default value they should be having in memory. Used to check no external entity changed them.
-11. Internal variables for IBIT.
-12. Internal variables for Operational mode.
-
-<!-- #### Class methods
- -->
-
+1. **USB connectivity-related variables**.
+2. **Circular buffer**: for RX message reception. Messages are taken from a receive queue[^3] and input into a message buffer, ready to be processed.
+3. **Pending commands**: all commands for which the driver could ask something from the RX. They are marked "pending" until the response actually comes.
+4. **RX internal data**: internal data we know from the RX, each variable updated in a different operational mode in no particular order. But at least all RX info is packed here.
+5. **Analytics**: for tracking count of checksum errors and worst case execution times.
+6. **Driver's Finite State Machine (FSM)**: self-explanatory.
+7. **The Config Handler**: internal data of the piece of code in charge of reading, checking and updating RX configuration as desired. It's complicated and will have its own blog entry later on.
+8. **Internal variables for BIT**: I will explain it later, but the BIT (Built-In Test) is a set of checks that IBIT, PBIT and IBIT have in common. It is not a mode in of itself.
+9. **Internal variables for PBIT**: also includes the "ascfg", or *Application-Specific Config*, which is a dictionary with all configuration values that differ from the defaults declared in the ICD and need to be configured into the RX.
+10. **Internal variables for CBIT**: also includes the "defcfg", or *Default Config*, which is a dictionary with *all* configuration values (minus application-specific) declared in the ICD and the default value they should be having in memory. Used to check no external entity changed them.
+11. **Internal variables for IBIT**.
+12. **Internal variables for Operational mode**.
 
 [^3]: Just like (actually mimicking) a queue filled by a DMA peripheral, in order to avoid processing messages by interruption. This was actually the approach used with the STM32 prior to pivoting into PC+USB+Python. Due to the slow rate messaging, interruption could have worked fine, but since DMA is present, why not use it?
+
+
+#### Class methods intended to be public
+1. `connect()`: opens serial communication using pyserial at a baud rate of 38400, but any value will do. There's no UART behind the USB connector in the Sparkfun board, but rather a pinout from the actual USB pins on the M9 chip. So baudrate doesn't apply as it would if we were to pin the UART1 to a UART-to-USB converter. Just choose the right COM interface depending on where you plugged the USB on your PC.
+Note that this function will place the `_read_loop()` method in a separate thread. It will solely be in charge of placing the incoming data from the USB **in a ring buffer for the main application to consume it**.
+
+![alt text](sparkfun_usb_pins.png "M9 pinout")
+
+2. `is_connected()`: to assert that the next iteration of the infinite loop can be run by checking that the connection is up.
+3. `disconnect()`: join threads and close connection.
+4. `Run()`: main application function. In this order, it handles:
+    1. **Priority commands** that take precedence on the actions that the current operational mode require.
+    2. **Actions of current mode**.
+    3. **Consume data from the ring buffer** in which the `_read_loop()` function, running in a separate thread, is placing the messages. This includes parsing the message and storing its information in the internal class attributes.
+
+
+If the reader takes a look at the code, he will see that there are some other public methods that can launched depending on user input via the same terminal the program is running. Those are:
+1. `launch_ibit()`: mentioned above, the IBIT is called by the instance owner of the class. That's you, at your discretion. Typing "ibit" in upper or lowercase wil trigger it.
+2. `activate_geofence()` and `deactivate_geofence()`: this is still a work in progress, but it's intended to set up a perimeter surrounding the location of the beacon (which will be static mostly) and alert when it exits said perimeter, because of a theft for instance.
+
+Next blog entry will dive deeper in the meat of the matter: the `Run()` function.
