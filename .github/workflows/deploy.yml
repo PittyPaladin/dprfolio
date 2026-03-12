@@ -26,7 +26,6 @@ jobs:
           sudo snap install hugo
       - name: Build
         run: |
-          cd ${RUNNER_TEMP}
           hugo
 
       - name: Deploy
