@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Home on David&#39;s Archives</title>
+    <link>https://PittyPaladin.github.io/dprfolio/</link>
+    <description>Recent content in Home on David&#39;s Archives</description>
+    <generator>Hugo</generator>
+    <language>en-US</language>
+    <copyright>Copyright © 2026, David Pérez Ruiz.</copyright>
+    <lastBuildDate>Tue, 03 Mar 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://PittyPaladin.github.io/dprfolio/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>About</title>
+      <link>https://PittyPaladin.github.io/dprfolio/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://PittyPaladin.github.io/dprfolio/about/</guid>
+      <description>&lt;h2 id=&#34;who-am-i&#34;&gt;Who am I?&lt;/h2&gt;&#xA;&lt;div class=&#34;bio&#34;&gt;&#xA;  &lt;img src=&#34;https://PittyPaladin.github.io/dprfolio/images/me.png&#34; alt=&#34;Photo of me&#34; class=&#34;bio-photo&#34;&gt;&#xA;  &lt;p&gt;&#xA;    &lt;p&gt;I&amp;rsquo;m David Pérez, an engineer living in the beautiful city of Barcelona, Spain. I hold a BSc in Aerospace Engineering and a MSc in Automatic Control, both from the &lt;a href=&#34;https://www.upc.edu/en&#34;&gt;Polytechnic University of Catalonia&lt;/a&gt;. I have some experience in Computer Vision (both Deep Learning and traditional), but most of my career has been revolving the different technical layers that compose modern Satellite Navigation Receivers, aka &lt;a href=&#34;https://en.wikipedia.org/wiki/Satellite_navigation&#34;&gt;GNSS&lt;/a&gt;.&lt;/p&gt;&#xA;&lt;p&gt;That includes embedded software running on real-time systems; integrating third-party sensors, like commercial GNSS receivers and inertial sensors; sensor fusion; and raw satellite RF measurement and data extraction.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>A driver for the Ublox M9: Operational mode</title>
+      <link>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-operational-mode/</link>
+      <pubDate>Tue, 03 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-operational-mode/</guid>
+      <description>&lt;h2 id=&#34;the-operational-mode&#34;&gt;The Operational mode&lt;/h2&gt;&#xA;&lt;p&gt;At last, the Operational mode. I have dedicated so much time to the rest of the modes that Operational mode has end up being quite simple. It shall handle geofencing, if activated (work in progress) and that&amp;rsquo;s all. Here you have ample room to expand the functionality depending on your needs, like:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Doing some consistency checks on the PVT output.&lt;/li&gt;&#xA;&lt;li&gt;Filling a queue so that the driver&amp;rsquo;s caller (the MCU for instance) has the latest info on positioning, perhaps to forward it via LoraWAN.&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;At the beginning of writing the Operational mode, I polled PVT messages manually. But I changed it to just letting the Ublox give me the PVTs at his own pace and storing them in an internal data structure, in here:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>A driver for the Ublox M9: CBIT</title>
+      <link>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-cbit/</link>
+      <pubDate>Mon, 02 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-cbit/</guid>
+      <description>&lt;h2 id=&#34;the-continuous-built-in-test-cbit-procedure&#34;&gt;The Continuous Built-In Test (CBIT) procedure&lt;/h2&gt;&#xA;&lt;p&gt;The normal workflow of the driver shall be:&lt;/p&gt;&#xA;&lt;p&gt;RX is powered up ⇒ Driver begins execution ⇒ Driver goes to PBIT mode ⇒ PBIT succeeds and goes to Operational&lt;/p&gt;&#xA;&lt;p&gt;The story could end here, but it&amp;rsquo;s interesting to add checks in run-time to assert that subsystems work and no corrective action is required. That is called Continuous Built-In Test (CBIT). Of course, the need for this and how complex it becomes will vary from application to application. For the driver of a receiver, the CBIT I&amp;rsquo;ve designed is fairly simple. It consists of the following stages:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>A driver for the Ublox M9: IBIT</title>
+      <link>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-ibit/</link>
+      <pubDate>Sun, 01 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-ibit/</guid>
+      <description>&lt;h2 id=&#34;the-initialised-built-in-test-ibit-procedure&#34;&gt;The Initialised Built-In Test (IBIT) procedure&lt;/h2&gt;&#xA;&lt;p&gt;As you may know the driver can, at the user&amp;rsquo;s discretion, initiate a test. It is intended to check that internally the receiver is working properly, and it could take the driver out of Failure mode. This is called IBIT.&lt;/p&gt;&#xA;&lt;p&gt;Below I list the IBIT procedure I&amp;rsquo;ve designed:&lt;/p&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;&lt;strong&gt;Clear memory&lt;/strong&gt;: delete all configuration in flash and Battery Backed RAM (BBR), and rebuild configuration. Very similar to step #1 from PBIT (and the message is actually the same, UBX-CFG-CFG, changing the &lt;code&gt;deviceMask&lt;/code&gt; field), with the difference that this one will erase flash. This will set the receiver to a factory configuration state.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>A driver for the Ublox M9: Mode Handling, PBIT</title>
+      <link>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-mode-handling-pbit/</link>
+      <pubDate>Sun, 01 Feb 2026 00:00:00 +0000</pubDate>
+      <guid>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-mode-handling-pbit/</guid>
+      <description>&lt;h1 id=&#34;the-power-up-built-in-test-pbit&#34;&gt;The Power-up Built-In Test (PBIT)&lt;/h1&gt;&#xA;&lt;p&gt;The PBIT procedure is a mode run only at driver startup. Its purpose is to run a battery of tests to assert that the system is indeed good to go into Operational mode, or at least that&amp;rsquo;s the definition. In addition to that, the PBIT I&amp;rsquo;ve designed is in charge of configuration control. That means the PBIT is in charge of making sure that the RX&amp;rsquo;s configuration is set to the values needed to fulfill the specific application it is intended to carry. For this case it&amp;rsquo;s a low-power positioning that for a static device will only be needed once or twice per day, to check it hasn&amp;rsquo;t been stolen. But it could be the contrary, perhaps you&amp;rsquo;re building a fast-moving vehicle and need a constant high PVT output rate.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>A driver for the Ublox M9: Read the ring</title>
+      <link>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-read-the-ring/</link>
+      <pubDate>Thu, 15 Jan 2026 00:00:00 +0000</pubDate>
+      <guid>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-read-the-ring/</guid>
+      <description>&lt;p&gt;In the &lt;a href=&#34;https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-development-environment/&#34;&gt;last article&lt;/a&gt; I mentioned that calling &lt;code&gt;driver.connect()&lt;/code&gt; triggers a thread with the only purpose of reading the serial data and placing it into a buffer ring. A ring buffer (or circular buffer) is a fixed‑size array that treats its ends as connected. When you reach the end, you wrap around to the beginning. This shouldn&amp;rsquo;t happen, of course, since it would mean data loss. You need to to consume faster than loading. In the code I have used Python&amp;rsquo;s &lt;code&gt;deque&lt;/code&gt; with a maximum length of 1024 bytes. During my testing this has proven to be enough, but it&amp;rsquo;s possible that if you activate the highest refresh rates on many message types at the same time it could loose data.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>A driver for the Ublox M9: Development environment</title>
+      <link>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-development-environment/</link>
+      <pubDate>Sun, 28 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-development-environment/</guid>
+      <description>&lt;h2 id=&#34;hardware-set-up&#34;&gt;Hardware set up&lt;/h2&gt;&#xA;&lt;p&gt;As mentioned in the last post:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Antenna positioned in the most open area possible. I live in the 3rd floor of a building so 20 cm sticking out from the window was the best I could do. This will yield quite a lot of multipath&lt;sup id=&#34;fnref:1&#34;&gt;&lt;a href=&#34;#fn:1&#34; class=&#34;footnote-ref&#34; role=&#34;doc-noteref&#34;&gt;1&lt;/a&gt;&lt;/sup&gt; but will make do. Connect the SMA male connector of the antenna into the SMA female of the Sparkfun board.&lt;/li&gt;&#xA;&lt;li&gt;USB-C data-capable cable connected to the Sparkfun board.&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h2 id=&#34;software-set-up&#34;&gt;Software set up&lt;/h2&gt;&#xA;&lt;p&gt;Being Python the programming language of choice, create a virtual environment to avoid polluting the base installation. You may use &lt;code&gt;pip&lt;/code&gt;, but I used &lt;code&gt;conda&lt;/code&gt; like so:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>A driver for the Ublox M9: Introduction</title>
+      <link>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-introduction/</link>
+      <pubDate>Sat, 27 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-introduction/</guid>
+      <description>&lt;h2 id=&#34;motivation&#34;&gt;Motivation&lt;/h2&gt;&#xA;&lt;p&gt;Even though I love my profession and quite like where I work, I (as many others) have always desired to create and own a product from scratch rather than be a piece of the Adam Smiths&amp;rsquo;s division of labour (not criticizing that, we would go to the stone age otherwise). Something small and simple enough that 1 or 2 persons can manage it, but still advanced enough to add value to users and fulfill a necessity where other products haven&amp;rsquo;t.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="shortcut icon" href="https://PittyPaladin.github.io/dprfolio/images/favicon.png" />
+<title>A driver for the Ublox M9: Read the ring | David&#39;s Archives</title>
+<meta name="title" content="A driver for the Ublox M9: Read the ring" />
+<meta name="description" content="Article explaining the development environment of a driver project for a commercial GNSS receiver. This article specifically explains how data is read from the receiver and its contents parsed." />
+<meta name="keywords" content="gnss,ublox,receiver,driver," />
+
+
+<meta property="og:url" content="https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-read-the-ring/">
+  <meta property="og:site_name" content="David&#39;s Archives">
+  <meta property="og:title" content="A driver for the Ublox M9: Read the ring">
+  <meta property="og:description" content="Article explaining the development environment of a driver project for a commercial GNSS receiver. This article specifically explains how data is read from the receiver and its contents parsed.">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="blog">
+    <meta property="article:published_time" content="2026-01-15T00:00:00+00:00">
+    <meta property="article:modified_time" content="2026-01-15T00:00:00+00:00">
+    <meta property="article:tag" content="Gnss">
+    <meta property="article:tag" content="Ublox">
+    <meta property="article:tag" content="Receiver">
+    <meta property="article:tag" content="Driver">
+    <meta property="og:image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+
+
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+  <meta name="twitter:title" content="A driver for the Ublox M9: Read the ring">
+  <meta name="twitter:description" content="Article explaining the development environment of a driver project for a commercial GNSS receiver. This article specifically explains how data is read from the receiver and its contents parsed.">
+
+
+
+
+  <meta itemprop="name" content="A driver for the Ublox M9: Read the ring">
+  <meta itemprop="description" content="Article explaining the development environment of a driver project for a commercial GNSS receiver. This article specifically explains how data is read from the receiver and its contents parsed.">
+  <meta itemprop="datePublished" content="2026-01-15T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2026-01-15T00:00:00+00:00">
+  <meta itemprop="wordCount" content="1661">
+  <meta itemprop="image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+  <meta itemprop="keywords" content="Gnss,Ublox,Receiver,Driver">
+<meta name="referrer" content="no-referrer-when-downgrade" />
+
+  <style>
+  :root {
+    --width: 720px;
+    --font-main: Verdana, sans-serif;
+    --font-secondary: Verdana, sans-serif;
+    --font-scale: 1em;
+    --background-color: #fff;
+    --heading-color: #222;
+    --text-color: #444;
+    --link-color: #3273dc;
+    --visited-color: #8b6fcb;
+    --blockquote-color: #222;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background-color: #000000;
+      --heading-color: #eee;
+      --text-color: #ddd;
+      --link-color: #8cc2dd;
+      --visited-color: #8b6fcb;
+      --blockquote-color: #ccc;
+    }
+  }
+
+  body {
+    font-family: var(--font-secondary);
+    font-size: var(--font-scale);
+    margin: auto;
+    padding: 20px;
+    max-width: var(--width);
+    text-align: left;
+    background-color: var(--background-color);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5;
+    color: var(--text-color);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-main);
+    color: var(--heading-color);
+  }
+
+  a {
+    color: var(--link-color);
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  nav a {
+    margin-right: 15px;
+  }
+
+  strong,
+  b {
+    color: var(--heading-color);
+  }
+
+  button {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  time {
+    font-family: monospace;
+    font-style: normal;
+    font-size: 15px;
+  }
+
+  main {
+    line-height: 1.6;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  code {
+    font-family: monospace;
+    padding: 2px;
+    border-radius: 3px;
+  }
+
+  blockquote {
+    border-left: 1px solid #999;
+    color: var(--blockquote-color);
+    padding-left: 20px;
+    font-style: italic;
+  }
+
+  footer {
+    padding: 15px 0;
+    text-align: center;
+  }
+
+  .inline {
+    width: auto !important;
+  }
+
+  .highlight,
+  .code {
+    border-radius: 3px;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    overflow-x: auto;
+    color: #444
+  }
+
+   
+  ul.blog-posts {
+    list-style-type: none;
+    padding: unset;
+  }
+
+  ul.blog-posts li {
+    display: flex;
+  }
+
+  ul.blog-posts li span {
+    flex: 0 0 130px;
+  }
+
+  ul.blog-posts li a:visited {
+    color: var(--visited-color);
+  }
+
+</style>
+
+</head>
+
+<body>
+  <header>
+
+<div class="site-header">
+  <a href="/dprfolio/" class="title">
+    <h1>David&#39;s Archives</h1>
+  </a>
+  <nav>
+<a href="/dprfolio/">Home</a>
+
+<a href="/dprfolio/about/">About</a>
+
+<a href="/dprfolio/blog/">Blog</a>
+
+</nav>
+</div>
+
+<style>
+.site-header {
+  border: 1px solid currentColor;
+  padding: 1rem;
+  margin-bottom: 2rem;  
+  text-align: center;
+}
+
+.title:hover {
+  text-decoration: none;
+}
+
+
+.title h1 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+</style></header>
+  <main>
+
+<h1>A driver for the Ublox M9: Read the ring</h1>
+<p>
+  <i>
+    <time datetime='2026-01-15'>
+      15 Jan, 2026
+    </time>
+  </i>
+</p>
+
+<content>
+  <p>In the <a href="https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-development-environment/">last article</a> I mentioned that calling <code>driver.connect()</code> triggers a thread with the only purpose of reading the serial data and placing it into a buffer ring. A ring buffer (or circular buffer) is a fixed‑size array that treats its ends as connected. When you reach the end, you wrap around to the beginning. This shouldn&rsquo;t happen, of course, since it would mean data loss. You need to to consume faster than loading. In the code I have used Python&rsquo;s <code>deque</code> with a maximum length of 1024 bytes. During my testing this has proven to be enough, but it&rsquo;s possible that if you activate the highest refresh rates on many message types at the same time it could loose data.</p>
+<p>In this article I will explain the second to last function inside the <code>Run()</code> method: <code>read_rx_ring()</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span><span style="color:#007020;font-weight:bold">def</span> <span style="color:#06287e">Run</span>(<span style="color:#007020">self</span>):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>    runStartTs <span style="color:#666">=</span> time<span style="color:#666">.</span>monotonic()
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>    <span style="color:#60a0b0;font-style:italic"># Early exit if not running</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>    <span style="color:#007020;font-weight:bold">if</span> <span style="color:#007020;font-weight:bold">not</span> <span style="color:#007020">self</span><span style="color:#666">.</span>running:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>        <span style="color:#007020;font-weight:bold">return</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>    <span style="color:#60a0b0;font-style:italic"># Handle priority commands</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>    <span style="color:#007020">self</span><span style="color:#666">.</span>handle_priority_cmd()
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>    <span style="color:#60a0b0;font-style:italic"># Handle current mode actions</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>    <span style="color:#007020">self</span><span style="color:#666">.</span>handle_mode()
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14</span><span>    <span style="color:#60a0b0;font-style:italic"># Read bytes in ring and process messages</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15</span><span>    <span style="color:#007020">self</span><span style="color:#666">.</span>read_rx_ring()
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17</span><span>    <span style="color:#60a0b0;font-style:italic"># Compute Run() execution time and store Worst Case Execution Time (wcet)</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18</span><span>    runExecTime <span style="color:#666">=</span> time_diff_from(runStartTs)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19</span><span>    <span style="color:#007020;font-weight:bold">if</span> runExecTime <span style="color:#666">&gt;</span> <span style="color:#007020">self</span><span style="color:#666">.</span>wcet_:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20</span><span>        <span style="color:#007020">self</span><span style="color:#666">.</span>wcet_ <span style="color:#666">=</span> runExecTime
+</span></span></code></pre></div><h2 id="grab-the-lock">Grab the lock</h2>
+<p>Before reading from the ring buffer storing the bytes, you need to grab the lock. This will avoid writing data to it while you are popping value. If <code>_read_loop()</code> on the other thread is called while you read (thus having the lock), it will wait in the <code>with self.lock:</code> until you release it. This behavior can be changed to be non-blocking or have a timeout if that suits your needs.</p>
+<h2 id="pop-bytes">Pop bytes</h2>
+<p>Looking at the way data is pushed into the ring buffer</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#007020">self</span><span style="color:#666">.</span>rxRing_<span style="color:#666">.</span>extend( <span style="color:#007020">list</span>(<span style="color:#007020">self</span><span style="color:#666">.</span>ser<span style="color:#666">.</span>readline()) )
+</span></span></code></pre></div><p>you&rsquo;ll see that the bytes pyserial is returning with the call <code>readline()</code> are put one by one into the ring. If, for instance, 5 bytes are received, the 5 are put independently instead of one single bytes instance of 5.</p>
+<p>This way, if you look at the code, you can go on popping from the queue chunks of bytes and parsing them in pieces. When no more bytes can be popped from the queue, break from the loop and go on to do something else.</p>
+<p>It&rsquo;s important to note that if you intended to read, for instance, 20 bytes from the queue (aka <code>self.ringBytesToRead_ = 20</code>) and only 10 bytes are available (ie <code>bytesRead</code> is 10), those 10 bytes will be put in the buffer <code>self.msgBuffer_</code> but no action will be performed, because you still don&rsquo;t have what you requested. If in the next iteration the queue was filled and the remaining 10 bytes were able to be popped, then an action can be performed.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span><span style="color:#007020;font-weight:bold">def</span> <span style="color:#06287e">read_rx_ring</span>(<span style="color:#007020">self</span>):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>    <span style="color:#007020;font-weight:bold">with</span> <span style="color:#007020">self</span><span style="color:#666">.</span>lock:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>        <span style="color:#60a0b0;font-style:italic"># Read until emptying the ring</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>        <span style="color:#007020;font-weight:bold">while</span> <span style="color:#007020;font-weight:bold">True</span>:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>            <span style="color:#60a0b0;font-style:italic"># Read a certain number of bytes from the RX ring into a &lt;class &#39;bytes&#39;&gt;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>            msg <span style="color:#666">=</span> popN(<span style="color:#007020">self</span><span style="color:#666">.</span>rxRing_, <span style="color:#007020">self</span><span style="color:#666">.</span>ringBytesToRead_)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>            <span style="color:#007020;font-weight:bold">if</span> <span style="color:#007020">len</span>(msg) <span style="color:#666">==</span> <span style="color:#40a070">0</span>:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>                <span style="color:#007020;font-weight:bold">break</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>            bytesRead <span style="color:#666">=</span> <span style="color:#007020">len</span>(msg)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>            <span style="color:#60a0b0;font-style:italic"># Update bytes to read subtracting the ones read just now</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>            <span style="color:#007020">self</span><span style="color:#666">.</span>ringBytesToRead_ <span style="color:#666">-=</span> bytesRead
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span>            <span style="color:#60a0b0;font-style:italic"># Store them into a temporary buffer</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14</span><span>            <span style="color:#007020">self</span><span style="color:#666">.</span>msgBuffer_[<span style="color:#007020">self</span><span style="color:#666">.</span>msgIdx_ : <span style="color:#007020">self</span><span style="color:#666">.</span>msgIdx_ <span style="color:#666">+</span> bytesRead] <span style="color:#666">=</span> msg
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15</span><span>            <span style="color:#007020">self</span><span style="color:#666">.</span>msgIdx_<span style="color:#666">+=</span> bytesRead
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17</span><span>            <span style="color:#60a0b0;font-style:italic"># All bytes that needed to be read from the ring have been read</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18</span><span>            <span style="color:#007020;font-weight:bold">if</span> <span style="color:#007020">self</span><span style="color:#666">.</span>ringBytesToRead_ <span style="color:#666">==</span> <span style="color:#40a070">0</span>:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19</span><span>                <span style="color:#007020;font-weight:bold">if</span> <span style="color:#007020">self</span><span style="color:#666">.</span>parserState_ <span style="color:#666">==</span> MsgParserState<span style="color:#666">.</span>eParserNone:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20</span><span>                    <span style="color:#007020">self</span><span style="color:#666">.</span>parseNone()
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21</span><span>                <span style="color:#007020;font-weight:bold">elif</span> <span style="color:#007020">self</span><span style="color:#666">.</span>parserState_ <span style="color:#666">==</span> MsgParserState<span style="color:#666">.</span>eParserUBX_SyncChar2:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22</span><span>                    <span style="color:#007020">self</span><span style="color:#666">.</span>parseUbxSyncChar2()
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23</span><span>                <span style="color:#007020;font-weight:bold">elif</span> <span style="color:#007020">self</span><span style="color:#666">.</span>parserState_ <span style="color:#666">==</span> MsgParserState<span style="color:#666">.</span>eParserNMEA:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24</span><span>                    <span style="color:#007020">self</span><span style="color:#666">.</span>parseNmea()
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25</span><span>                <span style="color:#007020;font-weight:bold">elif</span> <span style="color:#007020">self</span><span style="color:#666">.</span>parserState_ <span style="color:#666">==</span> MsgParserState<span style="color:#666">.</span>eParserUBX_PayloadLen:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26</span><span>                    <span style="color:#007020">self</span><span style="color:#666">.</span>parseUbxPayloadLen()
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27</span><span>                <span style="color:#007020;font-weight:bold">elif</span> <span style="color:#007020">self</span><span style="color:#666">.</span>parserState_ <span style="color:#666">==</span> MsgParserState<span style="color:#666">.</span>eParserUBX_Payload:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28</span><span>                    <span style="color:#007020">self</span><span style="color:#666">.</span>parseUbxPayload()
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29</span><span>                <span style="color:#007020;font-weight:bold">else</span>:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30</span><span>                    logger<span style="color:#666">.</span>critical(<span style="color:#4070a0">&#34;[FAIL] Wrong parser state&#34;</span>)
+</span></span></code></pre></div><h2 id="the-parser-state-machine">The parser state machine</h2>
+<p>The main issue is how many bytes to read from the queue, i.e. the class attribute <code>self.ringBytesToRead_</code>. The variable is instantiated at 1, so at the very first call of <code>read_rx_ring</code> only 1 byte is read. It is stored in a temporary message buffer, which will get parsed by one function or another depending on the parser state. The parser state (machine) is the expected meaning of the incoming bytes. In other words, if the byte just popped is expected to be the header of a message, its payload, or whatever. At the first iteration, being unknown the expected meaning of that 1 byte read, it is parsed as &ldquo;eParserNone&rdquo;. If you look into the function, you will see that if checks for the first UBX preamble synch char, 0xb5. If the byte equals that, the parser state is moved into the next stage, which is &ldquo;eParserUBX_SyncChar2&rdquo;. In other words: now the next byte you read will be expected to the the second synch char.</p>
+<p><img src="ubx_frame.png" alt="alt text" title="UBX frame structure"></p>
+<p>The UBX is not the only protocol used by the receiver. NMEA is also used. It being ascii and starting by &lsquo;$&rsquo;, the <code>parseNone</code> function also checks for that. At the end of the function the variable <code>self.ringBytesToRead_</code> is set to 1, meaning that in the next pop we only want 1 byte (again, the second synch char or the next NMEA character).</p>
+<p>In the event that the first and second sync characters of the UBX frame structure are found, the bytes to read from the queue at the next iteration are 4: Message Class (1 byte), Message ID (1 byte) and Payload Length (2 bytes). Parser state is changed to <code>eParserUBX_PayloadLen</code>.
+When parsing that, the first thing to do is check that the Message Class &amp; ID are recognized. They are listed under <strong>§3.8 UBX messages overview</strong> of the ICD, and I&rsquo;ve put them in Python as a nested list. The list&rsquo;s first index contains the classes, and each class contains a list with its IDs. This way, checking if a message Class/ID pair exists is as easy as doing:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#007020;font-weight:bold">def</span> <span style="color:#06287e">validUbxClassAndID</span>(<span style="color:#007020">self</span>, msg_class, msg_id):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>    <span style="color:#007020;font-weight:bold">return</span> msg_class <span style="color:#007020;font-weight:bold">in</span> SUPPORTED_UBX_MSGS <span style="color:#007020;font-weight:bold">and</span> msg_id <span style="color:#007020;font-weight:bold">in</span> SUPPORTED_UBX_MSGS[msg_class]
+</span></span></code></pre></div><p>If the Class and ID pair do exist, the parser is put into the state <code>eParserUBX_Payload</code>, meaning that the chunk of bytes to read in the next read loop iteration will be the current message&rsquo;s whole payload. Of course, <code>self.ringBytesToRead_</code> is set to whatever value the two last bytes of payload length is. Note that the byte order is little endian and that the payload length does not include the 2 trailing checksum bytes.</p>
+<p>The reading of the payload is fairly straight forward. The first thing is to check if the checksum computed from the message is the same as the one in the actual message. Note that the checksum is computed from the Message class byte (byte #2) till the end of the payload. If the checksum matches, the UBX is parsed according to the message class. Each message class has its parsing function, where in turn it will be parsed according to its ID.</p>
+<p>Let&rsquo;s take a look at UBX-MON-VER for instance. It&rsquo;s a UBX-MON type of message, so, according to §3.14 <em>&ldquo;The messages in the UBX-MON class are used to report the receiver status, such as hardware status or I/O subsystem statistics.&rdquo;</em> Going to §3.14.15.1, you can see that it will <em>&ldquo;Poll receiver and software version&rdquo;</em> if the user send this type of message</p>
+<p><img src="poll_ubx_mon_ver.png" alt="alt text" title="UBX-MON-VER polling message"></p>
+<p>And sending it is as easy as this snippet</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#007020;font-weight:bold">def</span> <span style="color:#06287e">req_mon_ver</span>(<span style="color:#007020">self</span>):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>    msg <span style="color:#666">=</span> struct<span style="color:#666">.</span>pack(<span style="color:#4070a0">&#39;&gt;HBBHBB&#39;</span>, <span style="color:#40a070">0xB562</span>, <span style="color:#40a070">0x0A</span>, <span style="color:#40a070">0x04</span>, <span style="color:#40a070">0x0000</span>, <span style="color:#40a070">0x0E</span>, <span style="color:#40a070">0x34</span>)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    <span style="color:#007020">self</span><span style="color:#666">.</span>send_command(msg)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>    <span style="color:#007020">self</span><span style="color:#666">.</span>cmds<span style="color:#666">.</span>bPendingMonVer_ <span style="color:#666">=</span> <span style="color:#007020;font-weight:bold">True</span>
+</span></span></code></pre></div><p>Note that since the polling message doesn&rsquo;t have anything in the payload that is dynamic or can vary, the checksum for this message will always be the same. You can compute it by hand calling the function <code>computeUbxCRC</code>. But the neat trick is letting u-center compute it for you.</p>
+<p>If you are a visual learner like me, I&rsquo;ve drawn a diagram of the parser state machine below. I think it&rsquo;s easier to understand rather than looking at the code.</p>
+
+
+<div class="wideimg" style="width: 250%;">
+  <img src="parse_readring.png" alt="Parser state machine diagram">
+</div>
+
+<style>
+.wideimg {
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+.wideimg img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+</style>
+
+<h3 id="wait-a-minute">Wait a minute&hellip;</h3>
+<p>You may be asking <em>that parsing method is all good and well when no bytes are lost, but what if they do?</em> Let&rsquo;s analyze what would happen if a byte (or more than one) is lost at any point:</p>
+<ul>
+<li>Byte lost at <code>eParserNone</code>: if byte read was going to be the 1st synch char but got lost, the loop will keep on reading messages until it reaches the next message. If that one is not corrupted, it will parse it.</li>
+<li>Byte lost at <code>eParserUBX_SyncChar2</code>: synch char 1 was read, and then but should have been synch char 2 got lost/corrupted. In that case, parser will back to mode <code>eParserNone</code> and keep reading bytes one by one until it find a synch char 1 again at the next message.</li>
+<li>Byte lost at <code>eParserUBX_PayloadLen</code>: if byte is lost/corrupted in any of the 4 bytes that compose Class/Id and Payload Length, the most likely scenario is that Class, ID or both are not recognized. If Payload Length is wrong, then the parser will go on to <code>eParserUBX_Payload</code> with a wrong length, which will cause a checksum miss. This will discard the message and put the parser back to <code>eParserNone</code>.</li>
+</ul>
+<h3 id="you-didnt-talk-about-nmea-parsing">You didn&rsquo;t talk about NMEA parsing&hellip;</h3>
+<p>If the incoming message is an NMEA, the decoding is byte by byte. This can be seen in the <code>parseNmea</code> function:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span><span style="color:#007020;font-weight:bold">def</span> <span style="color:#06287e">parseNmea</span>(<span style="color:#007020">self</span>):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>    <span style="color:#60a0b0;font-style:italic"># NMEA msg end chars reached, else keep on storing chars in the buffer</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>    <span style="color:#007020;font-weight:bold">if</span> <span style="color:#007020">self</span><span style="color:#666">.</span>msgBuffer_[<span style="color:#007020">self</span><span style="color:#666">.</span>msgIdx_ <span style="color:#666">-</span> <span style="color:#40a070">2</span>] <span style="color:#666">==</span> <span style="color:#007020">ord</span>(NMEA_END_CR_CHAR) <span style="color:#007020;font-weight:bold">and</span> \
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>       <span style="color:#007020">self</span><span style="color:#666">.</span>msgBuffer_[<span style="color:#007020">self</span><span style="color:#666">.</span>msgIdx_ <span style="color:#666">-</span> <span style="color:#40a070">1</span>] <span style="color:#666">==</span> <span style="color:#007020">ord</span>(NMEA_END_LF_CHAR):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>        <span style="color:#60a0b0;font-style:italic"># Whole NMEA message is in buffer, now decode its data</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>        <span style="color:#007020">self</span><span style="color:#666">.</span>decodeNMEA()
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>        <span style="color:#007020">self</span><span style="color:#666">.</span>parserState_ <span style="color:#666">=</span> MsgParserState<span style="color:#666">.</span>eParserNone
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>        <span style="color:#007020">self</span><span style="color:#666">.</span>msgIdx_ <span style="color:#666">=</span> <span style="color:#40a070">0</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>    <span style="color:#60a0b0;font-style:italic"># With NMEA messages always read byte per byte</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>    <span style="color:#007020">self</span><span style="color:#666">.</span>ringBytesToRead_ <span style="color:#666">=</span> <span style="color:#40a070">1</span>
+</span></span></code></pre></div><p>Only when the two end chars are found you can proceed to decode the NMEA as a string. I will not focus on this because the driver&rsquo;s comms are designed to be via UBX only.</p>
+<h2 id="whats-up-next">What&rsquo;s up next</h2>
+<p>I think I&rsquo;ve covered most of the RX message reading/parsing. Next blog entry will cover the RX mode handling. Since it is quite big, I&rsquo;ll break into parts.</p>
+
+</content>
+
+
+
+<p>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/gnss/">#Gnss</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/ublox/">#Ublox</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/receiver/">#Receiver</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/driver/">#Driver</a>
+  
+</p>
+
+  </main>
+  <footer>
+
+<footer>
+  <hr>
+
+  
+    <p>Copyright © 2026, David Pérez Ruiz.</p>
+  
+</footer>
+</footer>
+
+  
+</body>
+
+</html>

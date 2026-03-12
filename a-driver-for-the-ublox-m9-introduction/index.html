@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="shortcut icon" href="https://PittyPaladin.github.io/dprfolio/images/favicon.png" />
+<title>A driver for the Ublox M9: Introduction | David&#39;s Archives</title>
+<meta name="title" content="A driver for the Ublox M9: Introduction" />
+<meta name="description" content="Article introducing my driver project with a commercial GNSS receiver." />
+<meta name="keywords" content="gnss,ublox,receiver,driver," />
+
+
+<meta property="og:url" content="https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-introduction/">
+  <meta property="og:site_name" content="David&#39;s Archives">
+  <meta property="og:title" content="A driver for the Ublox M9: Introduction">
+  <meta property="og:description" content="Article introducing my driver project with a commercial GNSS receiver.">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="blog">
+    <meta property="article:published_time" content="2025-12-27T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-12-27T00:00:00+00:00">
+    <meta property="article:tag" content="Gnss">
+    <meta property="article:tag" content="Ublox">
+    <meta property="article:tag" content="Receiver">
+    <meta property="article:tag" content="Driver">
+    <meta property="og:image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+
+
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+  <meta name="twitter:title" content="A driver for the Ublox M9: Introduction">
+  <meta name="twitter:description" content="Article introducing my driver project with a commercial GNSS receiver.">
+
+
+
+
+  <meta itemprop="name" content="A driver for the Ublox M9: Introduction">
+  <meta itemprop="description" content="Article introducing my driver project with a commercial GNSS receiver.">
+  <meta itemprop="datePublished" content="2025-12-27T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2025-12-27T00:00:00+00:00">
+  <meta itemprop="wordCount" content="1160">
+  <meta itemprop="image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+  <meta itemprop="keywords" content="Gnss,Ublox,Receiver,Driver">
+<meta name="referrer" content="no-referrer-when-downgrade" />
+
+  <style>
+  :root {
+    --width: 720px;
+    --font-main: Verdana, sans-serif;
+    --font-secondary: Verdana, sans-serif;
+    --font-scale: 1em;
+    --background-color: #fff;
+    --heading-color: #222;
+    --text-color: #444;
+    --link-color: #3273dc;
+    --visited-color: #8b6fcb;
+    --blockquote-color: #222;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background-color: #000000;
+      --heading-color: #eee;
+      --text-color: #ddd;
+      --link-color: #8cc2dd;
+      --visited-color: #8b6fcb;
+      --blockquote-color: #ccc;
+    }
+  }
+
+  body {
+    font-family: var(--font-secondary);
+    font-size: var(--font-scale);
+    margin: auto;
+    padding: 20px;
+    max-width: var(--width);
+    text-align: left;
+    background-color: var(--background-color);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5;
+    color: var(--text-color);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-main);
+    color: var(--heading-color);
+  }
+
+  a {
+    color: var(--link-color);
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  nav a {
+    margin-right: 15px;
+  }
+
+  strong,
+  b {
+    color: var(--heading-color);
+  }
+
+  button {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  time {
+    font-family: monospace;
+    font-style: normal;
+    font-size: 15px;
+  }
+
+  main {
+    line-height: 1.6;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  code {
+    font-family: monospace;
+    padding: 2px;
+    border-radius: 3px;
+  }
+
+  blockquote {
+    border-left: 1px solid #999;
+    color: var(--blockquote-color);
+    padding-left: 20px;
+    font-style: italic;
+  }
+
+  footer {
+    padding: 15px 0;
+    text-align: center;
+  }
+
+  .inline {
+    width: auto !important;
+  }
+
+  .highlight,
+  .code {
+    border-radius: 3px;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    overflow-x: auto;
+    color: #444
+  }
+
+   
+  ul.blog-posts {
+    list-style-type: none;
+    padding: unset;
+  }
+
+  ul.blog-posts li {
+    display: flex;
+  }
+
+  ul.blog-posts li span {
+    flex: 0 0 130px;
+  }
+
+  ul.blog-posts li a:visited {
+    color: var(--visited-color);
+  }
+
+</style>
+
+</head>
+
+<body>
+  <header>
+
+<div class="site-header">
+  <a href="/dprfolio/" class="title">
+    <h1>David&#39;s Archives</h1>
+  </a>
+  <nav>
+<a href="/dprfolio/">Home</a>
+
+<a href="/dprfolio/about/">About</a>
+
+<a href="/dprfolio/blog/">Blog</a>
+
+</nav>
+</div>
+
+<style>
+.site-header {
+  border: 1px solid currentColor;
+  padding: 1rem;
+  margin-bottom: 2rem;  
+  text-align: center;
+}
+
+.title:hover {
+  text-decoration: none;
+}
+
+
+.title h1 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+</style></header>
+  <main>
+
+<h1>A driver for the Ublox M9: Introduction</h1>
+<p>
+  <i>
+    <time datetime='2025-12-27'>
+      27 Dec, 2025
+    </time>
+  </i>
+</p>
+
+<content>
+  <h2 id="motivation">Motivation</h2>
+<p>Even though I love my profession and quite like where I work, I (as many others) have always desired to create and own a product from scratch rather than be a piece of the Adam Smiths&rsquo;s division of labour (not criticizing that, we would go to the stone age otherwise). Something small and simple enough that 1 or 2 persons can manage it, but still advanced enough to add value to users and fulfill a necessity where other products haven&rsquo;t.</p>
+<p>One day, in a coffee break, some colleagues and I were talking about this idea where beacons are implanted in the middle of crops to send soil quality telemetry to a central server. We researched the idea and found that a company already does that, <a href="https://cropx.com/es/cropx-system/hardware/">CropX</a>. I was looking for a project to do in my spare time, and thought that a cheapo version of it could be fun, specially if adding those sensors that I always wanted to play with but never had the excuse. I also thought that this project was ideal to team up with my friend <a href="https://github.com/dabecart">Daniel Béjar</a>, with whom I wanted to work together for months.</p>
+<p>So, with that in mind, we sat down and wrote the requirements our soil sensor would. I will not bore you with the technicalities, suffice to say that in broad terms we wanted it to have:</p>
+<ol>
+<li>An NPK soil sensor.</li>
+<li>A plastic housing that is a Commercial Off The Shelve (COTS) with minor modifications.</li>
+<li>A battery, a recharging management system and a solar panel to recharge said battery.</li>
+<li>A GPS receiver (GNSS is the actual term, since multiple constellations will be used) for easy sensor location.</li>
+<li>A LoRaWAN emitter and receiver, capable to emit and receive telemetry, and forward other sensor&rsquo;s telemetry to reach a final endpoint.</li>
+<li>Some kind of microcontroller to orchestrate it all.</li>
+</ol>
+<p>It seemed something doable at the beginning, but wishful thinking caught us off guard. Again. There&rsquo;s no way 2 adults with a 9 to 5 job can do any of that in any sensible measure of time. Not even the programming, and that&rsquo;s without counting the PCB design, the mechanical design, and a fair amount of testing. So we decided to pick a &ldquo;subsystem&rdquo; from the one listed, the one we liked the most, and see how far we could go exploring the topic. That would be fun.</p>
+<p>And it indeed was. I have decided to write this series of posts explaining my journey.</p>
+<p>Daniel picked the LoRaWAN receiver/emitter. He plans to write a blog about his very interesting discoveries, full link when it&rsquo;s ready. I picked the GNSS receiver.</p>
+<h2 id="the-ublox-neo-m9n">The Ublox NEO-M9N</h2>
+<p>I had past work experience with high-end GNSS receivers from <a href="https://www.septentrio.com/en">Septentrio</a>, the <a href="https://www.septentrio.com/en/products/gnss-receivers/gnss-receiver-modules/mosaic-x5-devkit">MosaicX5</a> in particular, and I always wanted to explore the products of its main competitor, <a href="https://www.u-blox.com/en">Ublox</a>. Not only that, but see how well a ~40€ low-end standard receiver would fare (as of today MosaicX5 are ~700€ and high-end Ublox F10 are ~250€, outside my budget). I started searching the wide range of low-cost positioning products Ublox has, and settled for the NEO-M9N. Mainly because of the fact that Sparkfun has made a decently priced <a href="https://www.sparkfun.com/sparkfun-gps-breakout-neo-m9n-sma-qwiic.html">breakout board</a> for $70, thus liberating me from buying Ublox&rsquo;s expensive development kit and still having a ready-to-use SMA connection for the antenna and a USB-C to interface with the chip.</p>
+<p><img src="GPS-17285.png" alt="GPS-17285"></p>
+<p>I&rsquo;m going to be honest: I bought the NEO-M9N because it was the cheapest standard precision receiver that Sparkfun had in store with a plug-and-play USB-C. For a battery operated system the ultra-low power M10S would have ben a better option. I just wanted to get started talking to the receiver and figuring how it works. Which brings me to its Interface Control Document (ICD) and Graphical User Interface (GUI).</p>
+<p>The ICD, called Interface Manual by Ublox, is common for all M9 series (independent of the enclosure, which is the &ldquo;NEO&rdquo; part) and is the <a href="https://www.u-blox.com/sites/default/files/u-blox-M9-SPG-4.04_InterfaceDescription_UBX-21022436.pdf">u-blox M9 SPG 4.04</a>. In addition to the Interface Manual there&rsquo;s an <a href="https://www.u-blox.com/sites/default/files/NEO-M9N_Integrationmanual_UBX-19014286.pdf">Integration Manual</a> and a <a href="https://content.u-blox.com/sites/default/files/NEO-M9N-00B_DataSheet_UBX-19014285.pdf">Datasheet</a>. The latter talks about performance, electrical, mechanical and pinout stuff, and is not relevant for writing a driver with a pre-made breakout board like the Sparkfun one.</p>
+<p>The GUI is called <a href="https://content.u-blox.com/sites/default/files/u-center_Userguide_UBX-13005250.pdf">u-center</a>. Despite its appearence, it&rsquo;s an amazing piece of software. If you are getting started into the world of GNSS it will allow you to understand the basic concepts and what a serious receiver is able to do. For more advanced users, it&rsquo;s a productivity boost to test out configurations and write programs interfacing with it (drivers).</p>
+<p>In addition to the M9 from Sparkfun I also bought a very cheap antenna on Mouser, the <a href="https://www.mouser.es/ProductDetail/223-ANT-GPSC-SMA">ANT-GPSC-SMA from RF Solutions</a>. It has worked well enough for me provided you are not in the middle of a urban canyon.</p>
+<h2 id="starting-point">Starting point</h2>
+<p>The products have arrived by mail. Now what? First, to make sure that the breakout board works. Plugging antenna, USB-C to a PC with u-center installed, and choosing the right COM is all that is needed. Channels go into tracking and a PVT (Position, Velocity and Time, the actual navigation solution) is output. All is ok.</p>
+<p>The next question is: who do you want it to communicate with? As per the project intent, it should be able to communicate with a low power MicroController Unit (MCU). At the end of the day, all &ldquo;heavy-lifting&rdquo; is done by the sensors. The MCU will only ask them for outputs, do some basic logic with said output, and perhaps feed the sensors some input. On my end, at its most basic stage, the MCU should have the driver to (1) obtain a PVT solution from the M9, (2) repackage it to its most basic form, and (3) give that data to the LoRaWAN driver, which is on Daniel&rsquo;s end. He will, in turn, send that data to the LoRaWAN emitter, which will send the message over the air to whomever is listening.</p>
+<p>There are many MCU providers in the market. Daniel recommended an STM32, which was perfect since I already had one lying around. I connected the jumping wires to the UART1, set up the environment and started coding.</p>
+<p>I could go on explaining the ins and outs, but it would be useless: as development of the driver got more complicated, I decided to ditch the C approach on the STM32 and switch to Python running straight on my PC. The idea is: first write a very robust code in Python, with all the intricacies I feel are needed on a sensor as complex as a GNSS receiver, validate all functionality, and then go and port that to C.</p>
+<p>At the time of writing this post, with the Python driver nearing completion, I can confirm that this was the right decision. Regardless of the programming language or architecture the driver runs on, a thorough analysis of the Interface Manual and a proper software architecture are required. This will be the subject of the upcoming posts.</p>
+
+</content>
+
+
+
+<p>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/gnss/">#Gnss</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/ublox/">#Ublox</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/receiver/">#Receiver</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/driver/">#Driver</a>
+  
+</p>
+
+  </main>
+  <footer>
+
+<footer>
+  <hr>
+
+  
+    <p>Copyright © 2026, David Pérez Ruiz.</p>
+  
+</footer>
+</footer>
+
+  
+</body>
+
+</html>

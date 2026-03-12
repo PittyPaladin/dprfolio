@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="shortcut icon" href="https://PittyPaladin.github.io/dprfolio/images/favicon.png" />
+<title>A driver for the Ublox M9: CBIT | David&#39;s Archives</title>
+<meta name="title" content="A driver for the Ublox M9: CBIT" />
+<meta name="description" content="Article explaining the different working modes. In this specific case, the CBIT." />
+<meta name="keywords" content="gnss,ublox,receiver,driver," />
+
+
+<meta property="og:url" content="https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-cbit/">
+  <meta property="og:site_name" content="David&#39;s Archives">
+  <meta property="og:title" content="A driver for the Ublox M9: CBIT">
+  <meta property="og:description" content="Article explaining the different working modes. In this specific case, the CBIT.">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="blog">
+    <meta property="article:published_time" content="2026-03-02T00:00:00+00:00">
+    <meta property="article:modified_time" content="2026-03-02T00:00:00+00:00">
+    <meta property="article:tag" content="Gnss">
+    <meta property="article:tag" content="Ublox">
+    <meta property="article:tag" content="Receiver">
+    <meta property="article:tag" content="Driver">
+    <meta property="og:image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+
+
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+  <meta name="twitter:title" content="A driver for the Ublox M9: CBIT">
+  <meta name="twitter:description" content="Article explaining the different working modes. In this specific case, the CBIT.">
+
+
+
+
+  <meta itemprop="name" content="A driver for the Ublox M9: CBIT">
+  <meta itemprop="description" content="Article explaining the different working modes. In this specific case, the CBIT.">
+  <meta itemprop="datePublished" content="2026-03-02T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2026-03-02T00:00:00+00:00">
+  <meta itemprop="wordCount" content="346">
+  <meta itemprop="image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+  <meta itemprop="keywords" content="Gnss,Ublox,Receiver,Driver">
+<meta name="referrer" content="no-referrer-when-downgrade" />
+
+  <style>
+  :root {
+    --width: 720px;
+    --font-main: Verdana, sans-serif;
+    --font-secondary: Verdana, sans-serif;
+    --font-scale: 1em;
+    --background-color: #fff;
+    --heading-color: #222;
+    --text-color: #444;
+    --link-color: #3273dc;
+    --visited-color: #8b6fcb;
+    --blockquote-color: #222;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background-color: #000000;
+      --heading-color: #eee;
+      --text-color: #ddd;
+      --link-color: #8cc2dd;
+      --visited-color: #8b6fcb;
+      --blockquote-color: #ccc;
+    }
+  }
+
+  body {
+    font-family: var(--font-secondary);
+    font-size: var(--font-scale);
+    margin: auto;
+    padding: 20px;
+    max-width: var(--width);
+    text-align: left;
+    background-color: var(--background-color);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5;
+    color: var(--text-color);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-main);
+    color: var(--heading-color);
+  }
+
+  a {
+    color: var(--link-color);
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  nav a {
+    margin-right: 15px;
+  }
+
+  strong,
+  b {
+    color: var(--heading-color);
+  }
+
+  button {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  time {
+    font-family: monospace;
+    font-style: normal;
+    font-size: 15px;
+  }
+
+  main {
+    line-height: 1.6;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  code {
+    font-family: monospace;
+    padding: 2px;
+    border-radius: 3px;
+  }
+
+  blockquote {
+    border-left: 1px solid #999;
+    color: var(--blockquote-color);
+    padding-left: 20px;
+    font-style: italic;
+  }
+
+  footer {
+    padding: 15px 0;
+    text-align: center;
+  }
+
+  .inline {
+    width: auto !important;
+  }
+
+  .highlight,
+  .code {
+    border-radius: 3px;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    overflow-x: auto;
+    color: #444
+  }
+
+   
+  ul.blog-posts {
+    list-style-type: none;
+    padding: unset;
+  }
+
+  ul.blog-posts li {
+    display: flex;
+  }
+
+  ul.blog-posts li span {
+    flex: 0 0 130px;
+  }
+
+  ul.blog-posts li a:visited {
+    color: var(--visited-color);
+  }
+
+</style>
+
+</head>
+
+<body>
+  <header>
+
+<div class="site-header">
+  <a href="/dprfolio/" class="title">
+    <h1>David&#39;s Archives</h1>
+  </a>
+  <nav>
+<a href="/dprfolio/">Home</a>
+
+<a href="/dprfolio/about/">About</a>
+
+<a href="/dprfolio/blog/">Blog</a>
+
+</nav>
+</div>
+
+<style>
+.site-header {
+  border: 1px solid currentColor;
+  padding: 1rem;
+  margin-bottom: 2rem;  
+  text-align: center;
+}
+
+.title:hover {
+  text-decoration: none;
+}
+
+
+.title h1 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+</style></header>
+  <main>
+
+<h1>A driver for the Ublox M9: CBIT</h1>
+<p>
+  <i>
+    <time datetime='2026-03-02'>
+      02 Mar, 2026
+    </time>
+  </i>
+</p>
+
+<content>
+  <h2 id="the-continuous-built-in-test-cbit-procedure">The Continuous Built-In Test (CBIT) procedure</h2>
+<p>The normal workflow of the driver shall be:</p>
+<p>RX is powered up ⇒ Driver begins execution ⇒ Driver goes to PBIT mode ⇒ PBIT succeeds and goes to Operational</p>
+<p>The story could end here, but it&rsquo;s interesting to add checks in run-time to assert that subsystems work and no corrective action is required. That is called Continuous Built-In Test (CBIT). Of course, the need for this and how complex it becomes will vary from application to application. For the driver of a receiver, the CBIT I&rsquo;ve designed is fairly simple. It consists of the following stages:</p>
+<ol>
+<li>
+<p>Run a <strong>BIT</strong>. The BIT was explained <a href="https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-mode-handling-pbit/">here</a>.</p>
+</li>
+<li>
+<p><strong>Configuration Control</strong>. Same as <a href="https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-mode-handling-pbit/">PBIT</a>, but instead of applying the application-specific configuration, you check that <em>the rest</em> of the config items remain at their default values. That can be very useful if someone connected to the receiver via a port reserved for debug and changed some defaults and forgot to revert them before fielding the unit back again. This has actually happened to me in the past, using a MosaicX5 from Septentrio.</p>
+<p>Now, does this mean that I have parsed <em>all</em> the configuration items in the ICD and put their default values as expected values, like this?</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span>    <span style="color:#40a070">0x10780001</span>: {
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>    <span style="color:#4070a0">&#34;name&#34;</span>:<span style="color:#4070a0">&#34;CFG-USBOUTPROT-UBX&#34;</span>,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    <span style="color:#4070a0">&#34;type&#34;</span>: <span style="color:#4070a0">&#34;L&#34;</span>,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>    <span style="color:#4070a0">&#34;expectedVal&#34;</span>: <span style="color:#40a070">1</span>, <span style="color:#60a0b0;font-style:italic"># &lt;-- the default in the ICD</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span>    <span style="color:#4070a0">&#34;actualVal&#34;</span>: CFG_VAL_UNKNOWN,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span>},
+</span></span></code></pre></div><p>Yes, yes I have. Good thing LLMs can parse PDFs pretty good.</p>
+</li>
+</ol>
+<h2 id="tansition-from-cbit">Tansition from CBIT</h2>
+<p>Transition from CBIT is pretty straight forward, but one thing needs to be taken into account: <code>cfg_ctrl</code> needs to check the defaults of <em>a lot</em> of items. So many that they would make the CBIT take too much time, thus taking too long to back to Operational mode. To avoid this, there&rsquo;s a maximum time that CBIT may run.</p>
+<p>To sum up, CBIT will go to Operational mode if BIT was OK and the maximum CBIT time is reached or all default config items were checked. Any other case will put you in Failure mode.</p>
+<p>See below the diagram for the CBIT:</p>
+
+
+<div class="wideimg" style="width: 120%;">
+  <img src="cbit_flow.png" alt="Steps of the PBIT, diagram">
+</div>
+
+<style>
+.wideimg {
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+.wideimg img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+</style>
+
+
+</content>
+
+
+
+<p>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/gnss/">#Gnss</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/ublox/">#Ublox</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/receiver/">#Receiver</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/driver/">#Driver</a>
+  
+</p>
+
+  </main>
+  <footer>
+
+<footer>
+  <hr>
+
+  
+    <p>Copyright © 2026, David Pérez Ruiz.</p>
+  
+</footer>
+</footer>
+
+  
+</body>
+
+</html>

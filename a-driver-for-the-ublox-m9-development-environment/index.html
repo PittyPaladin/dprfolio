@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="shortcut icon" href="https://PittyPaladin.github.io/dprfolio/images/favicon.png" />
+<title>A driver for the Ublox M9: Development environment | David&#39;s Archives</title>
+<meta name="title" content="A driver for the Ublox M9: Development environment" />
+<meta name="description" content="Article explaining the development environment of a driver project for a commercial GNSS receiver." />
+<meta name="keywords" content="gnss,ublox,receiver,driver," />
+
+
+<meta property="og:url" content="https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-development-environment/">
+  <meta property="og:site_name" content="David&#39;s Archives">
+  <meta property="og:title" content="A driver for the Ublox M9: Development environment">
+  <meta property="og:description" content="Article explaining the development environment of a driver project for a commercial GNSS receiver.">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="blog">
+    <meta property="article:published_time" content="2025-12-28T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-12-28T00:00:00+00:00">
+    <meta property="article:tag" content="Gnss">
+    <meta property="article:tag" content="Ublox">
+    <meta property="article:tag" content="Receiver">
+    <meta property="article:tag" content="Driver">
+    <meta property="og:image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+
+
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+  <meta name="twitter:title" content="A driver for the Ublox M9: Development environment">
+  <meta name="twitter:description" content="Article explaining the development environment of a driver project for a commercial GNSS receiver.">
+
+
+
+
+  <meta itemprop="name" content="A driver for the Ublox M9: Development environment">
+  <meta itemprop="description" content="Article explaining the development environment of a driver project for a commercial GNSS receiver.">
+  <meta itemprop="datePublished" content="2025-12-28T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2025-12-28T00:00:00+00:00">
+  <meta itemprop="wordCount" content="1635">
+  <meta itemprop="image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+  <meta itemprop="keywords" content="Gnss,Ublox,Receiver,Driver">
+<meta name="referrer" content="no-referrer-when-downgrade" />
+
+  <style>
+  :root {
+    --width: 720px;
+    --font-main: Verdana, sans-serif;
+    --font-secondary: Verdana, sans-serif;
+    --font-scale: 1em;
+    --background-color: #fff;
+    --heading-color: #222;
+    --text-color: #444;
+    --link-color: #3273dc;
+    --visited-color: #8b6fcb;
+    --blockquote-color: #222;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background-color: #000000;
+      --heading-color: #eee;
+      --text-color: #ddd;
+      --link-color: #8cc2dd;
+      --visited-color: #8b6fcb;
+      --blockquote-color: #ccc;
+    }
+  }
+
+  body {
+    font-family: var(--font-secondary);
+    font-size: var(--font-scale);
+    margin: auto;
+    padding: 20px;
+    max-width: var(--width);
+    text-align: left;
+    background-color: var(--background-color);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5;
+    color: var(--text-color);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-main);
+    color: var(--heading-color);
+  }
+
+  a {
+    color: var(--link-color);
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  nav a {
+    margin-right: 15px;
+  }
+
+  strong,
+  b {
+    color: var(--heading-color);
+  }
+
+  button {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  time {
+    font-family: monospace;
+    font-style: normal;
+    font-size: 15px;
+  }
+
+  main {
+    line-height: 1.6;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  code {
+    font-family: monospace;
+    padding: 2px;
+    border-radius: 3px;
+  }
+
+  blockquote {
+    border-left: 1px solid #999;
+    color: var(--blockquote-color);
+    padding-left: 20px;
+    font-style: italic;
+  }
+
+  footer {
+    padding: 15px 0;
+    text-align: center;
+  }
+
+  .inline {
+    width: auto !important;
+  }
+
+  .highlight,
+  .code {
+    border-radius: 3px;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    overflow-x: auto;
+    color: #444
+  }
+
+   
+  ul.blog-posts {
+    list-style-type: none;
+    padding: unset;
+  }
+
+  ul.blog-posts li {
+    display: flex;
+  }
+
+  ul.blog-posts li span {
+    flex: 0 0 130px;
+  }
+
+  ul.blog-posts li a:visited {
+    color: var(--visited-color);
+  }
+
+</style>
+
+</head>
+
+<body>
+  <header>
+
+<div class="site-header">
+  <a href="/dprfolio/" class="title">
+    <h1>David&#39;s Archives</h1>
+  </a>
+  <nav>
+<a href="/dprfolio/">Home</a>
+
+<a href="/dprfolio/about/">About</a>
+
+<a href="/dprfolio/blog/">Blog</a>
+
+</nav>
+</div>
+
+<style>
+.site-header {
+  border: 1px solid currentColor;
+  padding: 1rem;
+  margin-bottom: 2rem;  
+  text-align: center;
+}
+
+.title:hover {
+  text-decoration: none;
+}
+
+
+.title h1 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+</style></header>
+  <main>
+
+<h1>A driver for the Ublox M9: Development environment</h1>
+<p>
+  <i>
+    <time datetime='2025-12-28'>
+      28 Dec, 2025
+    </time>
+  </i>
+</p>
+
+<content>
+  <h2 id="hardware-set-up">Hardware set up</h2>
+<p>As mentioned in the last post:</p>
+<ul>
+<li>Antenna positioned in the most open area possible. I live in the 3rd floor of a building so 20 cm sticking out from the window was the best I could do. This will yield quite a lot of multipath<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> but will make do. Connect the SMA male connector of the antenna into the SMA female of the Sparkfun board.</li>
+<li>USB-C data-capable cable connected to the Sparkfun board.</li>
+</ul>
+<h2 id="software-set-up">Software set up</h2>
+<p>Being Python the programming language of choice, create a virtual environment to avoid polluting the base installation. You may use <code>pip</code>, but I used <code>conda</code> like so:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#888">conda create --name myEnvName python=3.11
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#888">conda activate myEnvName
+</span></span></span></code></pre></div><p>Then proceed to install the only third-party dependency of this project, <code>pyserial</code>, which will abstract and encapsulate all serial port functionality and be OS-independent.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#888">conda install -c conda-forge pyserial
+</span></span></span></code></pre></div><p>If it&rsquo;s your first time hearing about <code>pyserial</code> I first recommend playing with its main methods, and perhaps reading some traces like the NMEA messages the receiver outputs by default.</p>
+<p>From this point on it is assumed some knowledge of the built-in and third-party libraries that I will be mentioning. This will take the shape more of a &ldquo;look how I did it&rdquo; than a tutorial.</p>
+<p>You can see the code in the Github repo <a href="https://github.com/PittyPaladin/ubloxTalker">here</a>.</p>
+<h3 id="some-notes-on-the-interface-document">Some notes on the Interface Document</h3>
+<p>The <a href="https://www.u-blox.com/sites/default/files/u-blox-M9-SPG-4.04_InterfaceDescription_UBX-21022436.pdf">Interface Document</a> defines two ways receive data from an Ublox receiver: via NMEA and via UBX messages. They are two different types of protocols. The former is used since configuration requires UBX anyway. For details on the UBX protocol take a look at §3.</p>
+<p>When looking at the ways to configure the receiver, one would typically look at the messages under the &ldquo;UBX-CFG (0x06)&rdquo; section. However, they come with a warning:</p>
+<blockquote>
+<p>This message is deprecated in protocol versions greater than 23.01. Use UBX-CFG-VALSET, UBX-CFGVALGET, UBX-CFG-VALDEL instead. See the Legacy UBX Message Fields Reference for the corresponding configuration item.</p>
+</blockquote>
+<p>In other words, if you want some future-proofness to your code, use the new configuration interface from §5. Without going into much detail, since it&rsquo;s already in the document, the new interface gives you a key/value pair for each configurable item in existence. This way, one can stack up all configuration key/value pairs in the same message and send it in one go.</p>
+<h2 id="lets-go">Let&rsquo;s go</h2>
+<h3 id="scope">Scope</h3>
+<p>You can make things as complicated as you want. That applies particularly to GNSS receiver drivers: simple communication parsing NMEA messages and using the default configuration is very easy to do. If you want a more robust driver that handles several operational modes, handles faults and acts upon them, in addition to apply your application-specific config, then that&rsquo;s another story. The scope of the project I&rsquo;m presenting to you is this second type. As the reader will see, the driver is also oriented towards energy saving.</p>
+<p>The capabilities for the M9 GNSS driver are the following:</p>
+<ol>
+<li>Full operational modes
+<ol>
+<li>Powerup Built-In Test (<strong>PBIT</strong>): battery of tests that run when starting up the driver<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>. Also loads the receiver with application-specific configuration.</li>
+<li>Continuous Built-In Test (<strong>CBIT</strong>): launched automatically every X seconds from the first time an <strong>Operational</strong> mode occurs. They interrupt the normal operational mode to do some quick checks to assert the system is running well, and proceed to correct those that can be corrected and resume <strong>Operational</strong>, or to <strong>Failure</strong> if they can&rsquo;t.</li>
+<li>Initiated Built-In Test (<strong>IBIT</strong>): BIT mode initiated by the driver instance owner (can only be called upstream). Designed to force a hard reset and a do-over of the <strong>PBIT</strong> mode, when for some unknown reason the driver is not performing as expected.</li>
+<li>Operational Mode (<strong>Operational</strong>): normal operational mode in which the driver does its main functions, like provide positioning, geofencing, etc. This state may transition to <strong>Failure</strong> or <strong>CBIT</strong> by itself, or to <strong>IBIT</strong> if asked by the driver instance owner.</li>
+<li>Failure Mode (<strong>Failure</strong>): no-return mode that captures the activities of the main <code>Run</code> method. If the driver ends up being integrated in a real receiver, this mode could alert upstream of the failure and the caller perhaps invoke an IBIT.</li>
+</ol>
+</li>
+<li>Communication with the receiver using the UBX protocol only.</li>
+<li>Configuration of the receiver using the new interface defined in §5 of the <a href="https://www.u-blox.com/sites/default/files/u-blox-M9-SPG-4.04_InterfaceDescription_UBX-21022436.pdf">Interface Document</a>.</li>
+</ol>
+<p><img src="m9state_trans.drawio.png" alt="alt text" title="Title"></p>
+<h3 id="scaffolding">Scaffolding</h3>
+<p>I&rsquo;m using an object oriented approach. There&rsquo;s a <code>GNSSDriver</code> class that encapsulates all attributes it may have and provides all the public methods needed to use it. In Python there&rsquo;s no such thing as &ldquo;public&rdquo; and &ldquo;private&rdquo; methods/attributes as in C++. Everything is public. Still, I like to make the differentiation in the comments (some people add underscores to indicate it) with:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#60a0b0;font-style:italic"># Public member functions</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#60a0b0;font-style:italic"># ---------------------------------------------</span>
+</span></span></code></pre></div><p>and</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#60a0b0;font-style:italic"># Private member functions</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#60a0b0;font-style:italic"># ---------------------------------------------</span>
+</span></span></code></pre></div><p>In addition to that, even though it&rsquo;s not needed by the language, I mimic C++ in the sense that all attributes used anywhere in the class are declared beforehand in the <code>__init__</code> method. This way, all attributes that could exist are easily identifiable and default initialized in one same place. They are all treated as private, in the sense that obtaining them should require a getter or a setter to modify their value.</p>
+<h4 id="class-attributes">Class attributes</h4>
+<p>Rather than copy pasting the typical UML class diagram for <code>GNSSDriver</code>, it makes more sense to explain the class attributes as groups, and elaborate on the purpose of each group. Going into the specific thing a variable does in that group overcomplicates the explanation. Besides, for sure you would do it in differently (better).</p>
+<p>Block of class attributes used for:</p>
+<ol>
+<li><strong>USB connectivity-related variables</strong>.</li>
+<li><strong>Circular buffer</strong>: for RX message reception. Messages are taken from a receive queue<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> and input into a message buffer, ready to be processed.</li>
+<li><strong>Pending commands</strong>: all commands for which the driver could ask something from the RX. They are marked &ldquo;pending&rdquo; until the response actually comes.</li>
+<li><strong>RX internal data</strong>: internal data we know from the RX, each variable updated in a different operational mode in no particular order. But at least all RX info is packed here.</li>
+<li><strong>Analytics</strong>: for tracking count of checksum errors and worst case execution times.</li>
+<li><strong>Driver&rsquo;s Finite State Machine (FSM)</strong>: self-explanatory.</li>
+<li><strong>The Config Handler</strong>: internal data of the piece of code in charge of reading, checking and updating RX configuration as desired. It&rsquo;s complicated and will have its own blog entry later on.</li>
+<li><strong>Internal variables for BIT</strong>: I will explain it later, but the BIT (Built-In Test) is a set of checks that IBIT, PBIT and IBIT have in common. It is not a mode in of itself.</li>
+<li><strong>Internal variables for PBIT</strong>: also includes the &ldquo;ascfg&rdquo;, or <em>Application-Specific Config</em>, which is a dictionary with all configuration values that differ from the defaults declared in the ICD and need to be configured into the RX.</li>
+<li><strong>Internal variables for CBIT</strong>: also includes the &ldquo;defcfg&rdquo;, or <em>Default Config</em>, which is a dictionary with <em>all</em> configuration values (minus application-specific) declared in the ICD and the default value they should be having in memory. Used to check no external entity changed them.</li>
+<li><strong>Internal variables for IBIT</strong>.</li>
+<li><strong>Internal variables for Operational mode</strong>.</li>
+</ol>
+<h4 id="class-methods-intended-to-be-public">Class methods intended to be public</h4>
+<ol>
+<li><code>connect()</code>: opens serial communication using pyserial at a baud rate of 38400, but any value will do. There&rsquo;s no UART behind the USB connector in the Sparkfun board, but rather a pinout from the actual USB pins on the M9 chip. So baudrate doesn&rsquo;t apply as it would if we were to pin the UART1 to a UART-to-USB converter. Just choose the right COM interface depending on where you plugged the USB on your PC.
+Note that this function will place the <code>_read_loop()</code> method in a separate thread. It will solely be in charge of placing the incoming data from the USB <strong>in a ring buffer for the main application to consume it</strong>.</li>
+</ol>
+<p><img src="sparkfun_usb_pins.png" alt="alt text" title="M9 pinout"></p>
+<ol start="2">
+<li><code>is_connected()</code>: to assert that the next iteration of the infinite loop can be run by checking that the connection is up.</li>
+<li><code>disconnect()</code>: join threads and close connection.</li>
+<li><code>Run()</code>: main application function. In this order, it handles:
+<ol>
+<li><strong>Priority commands</strong> that take precedence on the actions that the current operational mode require.</li>
+<li><strong>Actions of current mode</strong>.</li>
+<li><strong>Consume data from the ring buffer</strong> in which the <code>_read_loop()</code> function, running in a separate thread, is placing the messages. This includes parsing the message and storing its information in the internal class attributes.</li>
+</ol>
+</li>
+</ol>
+<p>If the reader takes a look at the code, he will see that there are some other public methods that can launched depending on user input via the same terminal the program is running. Those are:</p>
+<ol>
+<li><code>launch_ibit()</code>: mentioned above, the IBIT is called by the instance owner of the class. That&rsquo;s you, at your discretion. Typing &ldquo;ibit&rdquo; in upper or lowercase wil trigger it.</li>
+<li><code>activate_geofence()</code> and <code>deactivate_geofence()</code>: this is still a work in progress, but it&rsquo;s intended to set up a perimeter surrounding the location of the beacon (which will be static mostly) and alert when it exits said perimeter, because of a theft for instance.</li>
+</ol>
+<p>Next blog entry will dive deeper in the meat of the matter: the <code>Run()</code> function.</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>Multipath is the reflection of the satellite signal before reaching the receiver (bouncing through the building walls in this case), thus arrival times larger than an actual line of sight would.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>The caller program (the one upstream the GNSS driver) does not control power shutdown to the receiver. In a real deployment it should. After powering up the receiver it should wait a few seconds for it to wake up and then go to PBIT mode by calling the main <code>Run</code> method.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>Just like (actually mimicking) a queue filled by a DMA peripheral, in order to avoid processing messages by interruption. This was actually the approach used with the STM32 prior to pivoting into PC+USB+Python. Due to the slow rate messaging, interruption could have worked fine, but since DMA is present, why not use it?&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+</content>
+
+
+
+<p>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/gnss/">#Gnss</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/ublox/">#Ublox</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/receiver/">#Receiver</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/driver/">#Driver</a>
+  
+</p>
+
+  </main>
+  <footer>
+
+<footer>
+  <hr>
+
+  
+    <p>Copyright © 2026, David Pérez Ruiz.</p>
+  
+</footer>
+</footer>
+
+  
+</body>
+
+</html>

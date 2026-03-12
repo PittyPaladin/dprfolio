@@ -1,0 +1,2 @@
+User-Agent: *
+Sitemap: https://PittyPaladin.github.io/dprfolio/sitemap.xml
