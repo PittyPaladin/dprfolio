@@ -25,7 +25,9 @@ jobs:
         run: |
           sudo snap install hugo
       - name: Build
-        run: ${RUNNER_TEMP}/hugo
+        run: |
+          cd ${RUNNER_TEMP}
+          hugo
 
       - name: Deploy
         if: github.ref == 'refs/heads/master'
