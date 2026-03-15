@@ -42,7 +42,7 @@ You can see the code in the Github repo [here](https://github.com/PittyPaladin/u
 
 ### Some notes on the Interface Document
 
-The [Interface Document](https://www.u-blox.com/sites/default/files/u-blox-M9-SPG-4.04_InterfaceDescription_UBX-21022436.pdf) defines two ways receive data from an Ublox receiver: via NMEA and via UBX messages. They are two different types of protocols. The former is used since configuration requires UBX anyway. For details on the UBX protocol take a look at §3.
+The [Interface Document](https://www.u-blox.com/sites/default/files/u-blox-M9-SPG-4.04_InterfaceDescription_UBX-21022436.pdf) defines two ways to receive data from an Ublox receiver: via NMEA and via UBX messages. They are two different types of protocols. The former is used since configuration requires UBX anyway. For details on the UBX protocol take a look at §3 of the Interface Document.
 
 When looking at the ways to configure the receiver, one would typically look at the messages under the "UBX-CFG (0x06)" section. However, they come with a warning:
 
@@ -61,7 +61,7 @@ The capabilities for the M9 GNSS driver are the following:
 1. Full operational modes
    1. Powerup Built-In Test (**PBIT**): battery of tests that run when starting up the driver[^2]. Also loads the receiver with application-specific configuration.
    2. Continuous Built-In Test (**CBIT**): launched automatically every X seconds from the first time an **Operational** mode occurs. They interrupt the normal operational mode to do some quick checks to assert the system is running well, and proceed to correct those that can be corrected and resume **Operational**, or to **Failure** if they can't.
-   3. Initiated Built-In Test (**IBIT**): BIT mode initiated by the driver instance owner (can only be called upstream). Designed to force a hard reset and a do-over of the **PBIT** mode, when for some unknown reason the driver is not performing as expected.
+   3. Initiated Built-In Test (**IBIT**): BIT mode initiated by the driver instance owner (can only be called upstream). Designed to force a hard reset and a do-over of the **PBIT** mode when, for some unknown reason, the driver is not performing as expected.
    4. Operational Mode (**Operational**): normal operational mode in which the driver does its main functions, like provide positioning, geofencing, etc. This state may transition to **Failure** or **CBIT** by itself, or to **IBIT** if asked by the driver instance owner.
    5. Failure Mode (**Failure**): no-return mode that captures the activities of the main `Run` method. If the driver ends up being integrated in a real receiver, this mode could alert upstream of the failure and the caller perhaps invoke an IBIT.
 2. Communication with the receiver using the UBX protocol only.
@@ -91,7 +91,7 @@ In addition to that, even though it's not needed by the language, I mimic C++ in
 
 #### Class attributes
 
-Rather than copy pasting the typical UML class diagram for `GNSSDriver`, it makes more sense to explain the class attributes as groups, and elaborate on the purpose of each group. Going into the specific thing a variable does in that group overcomplicates the explanation. Besides, for sure you would do it in differently (better).
+Rather than copy pasting the typical UML class diagram for `GNSSDriver`, it makes more sense to explain the class attributes as groups, and elaborate on the purpose of each group. Going into the specific thing a variable does in that group overcomplicates the explanation. Besides, for sure you would do it differently (better).
 
 Block of class attributes used for:
 
@@ -101,7 +101,7 @@ Block of class attributes used for:
 4. **RX internal data**: internal data we know from the RX, each variable updated in a different operational mode in no particular order. But at least all RX info is packed here.
 5. **Analytics**: for tracking count of checksum errors and worst case execution times.
 6. **Driver's Finite State Machine (FSM)**: self-explanatory.
-7. **The Config Handler**: internal data of the piece of code in charge of reading, checking and updating RX configuration as desired. It's complicated and will have its own blog entry later on.
+7. **The Config Handler**: internal data of the piece of code in charge of reading, checking and updating RX configuration as desired. It's complicated and will have its [own blog entry]({{< ref "blog/ubloxM9/pbit/#config-control" >}}).
 8. **Internal variables for BIT**: I will explain it later, but the BIT (Built-In Test) is a set of checks that IBIT, PBIT and IBIT have in common. It is not a mode in of itself.
 9. **Internal variables for PBIT**: also includes the "ascfg", or *Application-Specific Config*, which is a dictionary with all configuration values that differ from the defaults declared in the ICD and need to be configured into the RX.
 10. **Internal variables for CBIT**: also includes the "defcfg", or *Default Config*, which is a dictionary with *all* configuration values (minus application-specific) declared in the ICD and the default value they should be having in memory. Used to check no external entity changed them.
@@ -125,7 +125,7 @@ Note that this function will place the `_read_loop()` method in a separate threa
     3. **Consume data from the ring buffer** in which the `_read_loop()` function, running in a separate thread, is placing the messages. This includes parsing the message and storing its information in the internal class attributes.
 
 
-If the reader takes a look at the code, he will see that there are some other public methods that can launched depending on user input via the same terminal the program is running. Those are:
+If the reader takes a look at the code, he will see that there are some other public methods that can be launched depending on user input via the same terminal the program is running. Those are:
 1. `launch_ibit()`: mentioned above, the IBIT is called by the instance owner of the class. That's you, at your discretion. Typing "ibit" in upper or lowercase wil trigger it.
 2. `activate_geofence()` and `deactivate_geofence()`: this is still a work in progress, but it's intended to set up a perimeter surrounding the location of the beacon (which will be static mostly) and alert when it exits said perimeter, because of a theft for instance.
 

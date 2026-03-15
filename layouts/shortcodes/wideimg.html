@@ -1,15 +1,17 @@
 {{ $width := .Get "width" | default "120%" }}
-
-<div class="wideimg" style="width: {{ $width }};">
-  <img src="{{ .Get "src" }}" alt="{{ .Get "alt" }}">
+<div class="wideimg-outer">
+  <div class="wideimg" style="width: {{ $width }};">
+    <img src="{{ .Get "src" }}" alt="{{ .Get "alt" }}">
+  </div>
 </div>
 
 <style>
-.wideimg {
-  margin-left: 50%;
-  transform: translateX(-50%);
+.wideimg-outer {
+  overflow-x: auto;
 }
-
+.wideimg {
+  margin: 0 auto;
+}
 .wideimg img {
   width: 100%;
   height: auto;

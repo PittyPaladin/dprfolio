@@ -10,7 +10,7 @@ tags = [
 ]
 +++
 
-In the [last article]({{< ref "blog/ubloxM9/develenv" >}}) I mentioned that calling `driver.connect()` triggers a thread with the only purpose of reading the serial data and placing it into a buffer ring. A ring buffer (or circular buffer) is a fixed‑size array that treats its ends as connected. When you reach the end, you wrap around to the beginning. This shouldn't happen, of course, since it would mean data loss. You need to to consume faster than loading. In the code I have used Python's `deque` with a maximum length of 1024 bytes. During my testing this has proven to be enough, but it's possible that if you activate the highest refresh rates on many message types at the same time it could loose data.
+In the [last article]({{< ref "blog/ubloxM9/develenv" >}}) I mentioned that calling `driver.connect()` triggers a thread with the only purpose of reading the serial data and placing it into a ring buffer. A ring buffer (or circular buffer) is a fixed‑size array that treats its ends as connected. When you reach the end, you wrap around to the beginning. This shouldn't happen, of course, since it would mean data loss. You need to consume faster than loading. In the code I have used Python's `deque` with a maximum length of 1024 bytes. During my testing this has proven to be enough, but it's possible that if you activate the highest refresh rates on many message types at the same time it could loose data.
 
 In this article I will explain the second to last function inside the `Run()` method: `read_rx_ring()`.
 
@@ -90,11 +90,11 @@ def read_rx_ring(self):
 
 ## The parser state machine
 
-The main issue is how many bytes to read from the queue, i.e. the class attribute `self.ringBytesToRead_`. The variable is instantiated at 1, so at the very first call of `read_rx_ring` only 1 byte is read. It is stored in a temporary message buffer, which will get parsed by one function or another depending on the parser state. The parser state (machine) is the expected meaning of the incoming bytes. In other words, if the byte just popped is expected to be the header of a message, its payload, or whatever. At the first iteration, being unknown the expected meaning of that 1 byte read, it is parsed as "eParserNone". If you look into the function, you will see that if checks for the first UBX preamble synch char, 0xb5. If the byte equals that, the parser state is moved into the next stage, which is "eParserUBX_SyncChar2". In other words: now the next byte you read will be expected to the the second synch char.
+The main issue is how many bytes to read from the queue, i.e. the class attribute `self.ringBytesToRead_`. The variable is instantiated at 1, so at the very first call of `read_rx_ring` only 1 byte is read. It is stored in a temporary message buffer, which will get parsed by one function or another depending on the parser state. The parser state (machine) is the expected meaning of the incoming bytes. In other words, if the byte just popped is expected to be the header of a message, its payload, or whatever. At the first iteration, being unknown the expected meaning of that 1 byte read, it is parsed as "eParserNone". If you look into the function, you will see that if checks for the first UBX preamble synch char, 0xb5. If the byte equals that, the parser state is moved into the next stage, which is "eParserUBX_SyncChar2". In other words: now the next byte you read will be expected to the second synch char.
 
 ![alt text](ubx_frame.png "UBX frame structure")
 
-The UBX is not the only protocol used by the receiver. NMEA is also used. It being ascii and starting by '$', the `parseNone` function also checks for that. At the end of the function the variable `self.ringBytesToRead_` is set to 1, meaning that in the next pop we only want 1 byte (again, the second synch char or the next NMEA character).
+The UBX is not the only protocol used by the receiver. NMEA is also used. It being [ASCII](https://en.wikipedia.org/wiki/ASCII#Printable_character_table) and starting by '$', the `parseNone` function also checks for that. At the end of the function the variable `self.ringBytesToRead_` is set to 1, meaning that in the next pop we only want 1 byte (again, the second synch char or the next NMEA character).
 
 In the event that the first and second sync characters of the UBX frame structure are found, the bytes to read from the queue at the next iteration are 4: Message Class (1 byte), Message ID (1 byte) and Payload Length (2 bytes). Parser state is changed to `eParserUBX_PayloadLen`.
 When parsing that, the first thing to do is check that the Message Class & ID are recognized. They are listed under **§3.8 UBX messages overview** of the ICD, and I've put them in Python as a nested list. The list's first index contains the classes, and each class contains a list with its IDs. This way, checking if a message Class/ID pair exists is as easy as doing:
@@ -125,15 +125,14 @@ Note that since the polling message doesn't have anything in the payload that is
 
 If you are a visual learner like me, I've drawn a diagram of the parser state machine below. I think it's easier to understand rather than looking at the code.
 
-{{< wideimg src="parse_readring.png" alt="Parser state machine diagram" width="250%" >}}
-
+{{< wideimg src="parse_readring.svg" alt="Parser state machine diagram" width="350%" >}}
 
 ### Wait a minute...
 
 You may be asking *that parsing method is all good and well when no bytes are lost, but what if they do?* Let's analyze what would happen if a byte (or more than one) is lost at any point:
 
 * Byte lost at `eParserNone`: if byte read was going to be the 1st synch char but got lost, the loop will keep on reading messages until it reaches the next message. If that one is not corrupted, it will parse it.
-* Byte lost at `eParserUBX_SyncChar2`: synch char 1 was read, and then but should have been synch char 2 got lost/corrupted. In that case, parser will back to mode `eParserNone` and keep reading bytes one by one until it find a synch char 1 again at the next message.
+* Byte lost at `eParserUBX_SyncChar2`: synch char 1 was read, and then but should have been synch char 2 got lost/corrupted. In that case, parser will back to mode `eParserNone` and keep reading bytes one by one until it finds a synch char 1 again at the next message.
 * Byte lost at `eParserUBX_PayloadLen`: if byte is lost/corrupted in any of the 4 bytes that compose Class/Id and Payload Length, the most likely scenario is that Class, ID or both are not recognized. If Payload Length is wrong, then the parser will go on to `eParserUBX_Payload` with a wrong length, which will cause a checksum miss. This will discard the message and put the parser back to `eParserNone`.
 
 ### You didn't talk about NMEA parsing...
