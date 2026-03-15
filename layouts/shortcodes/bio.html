@@ -1,34 +1,23 @@
 <div class="bio">
   <img src="{{ .Get "img" | relURL }}" alt="Photo of me" class="bio-photo">
-  <p>
-    {{ .Inner | markdownify }}
-  </p>
+  <div class="bio-text">{{ .Inner | markdownify }}</div>
 </div>
 
 <style>
 
-.bio-photo {
-  float: right;
-  max-width: 250px;     /* adjust size */
-  margin: 0 0 1rem 1rem; /* space between text and image */
-  border-radius: 4px;  /* optional */
+@media (min-width: 600px) {
+  .bio-photo {
+    float: right;
+    width: 250px;
+    margin: 0 0 1rem 1.5rem;
+  }
 }
 
-.bio-img {
-  width: 280px;
-  height: auto;
-  border-radius: 4px;
-}
-
-.bio-text {
-  flex: 1;
-}
-
-/* Stack on small screens */
 @media (max-width: 600px) {
-  .bio {
-    flex-direction: column;
-    text-align: center;
+  .bio-photo {
+    display: block;
+    width: 250px;
+    margin: 0 auto 0;
   }
 }
 </style>
