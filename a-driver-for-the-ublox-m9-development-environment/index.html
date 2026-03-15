@@ -42,7 +42,7 @@
   <meta itemprop="description" content="Article explaining the development environment of a driver project for a commercial GNSS receiver.">
   <meta itemprop="datePublished" content="2025-12-28T00:00:00+00:00">
   <meta itemprop="dateModified" content="2025-12-28T00:00:00+00:00">
-  <meta itemprop="wordCount" content="1635">
+  <meta itemprop="wordCount" content="1638">
   <meta itemprop="image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
   <meta itemprop="keywords" content="Gnss,Ublox,Receiver,Driver">
 <meta name="referrer" content="no-referrer-when-downgrade" />
@@ -259,7 +259,7 @@
 <p>From this point on it is assumed some knowledge of the built-in and third-party libraries that I will be mentioning. This will take the shape more of a &ldquo;look how I did it&rdquo; than a tutorial.</p>
 <p>You can see the code in the Github repo <a href="https://github.com/PittyPaladin/ubloxTalker">here</a>.</p>
 <h3 id="some-notes-on-the-interface-document">Some notes on the Interface Document</h3>
-<p>The <a href="https://www.u-blox.com/sites/default/files/u-blox-M9-SPG-4.04_InterfaceDescription_UBX-21022436.pdf">Interface Document</a> defines two ways receive data from an Ublox receiver: via NMEA and via UBX messages. They are two different types of protocols. The former is used since configuration requires UBX anyway. For details on the UBX protocol take a look at §3.</p>
+<p>The <a href="https://www.u-blox.com/sites/default/files/u-blox-M9-SPG-4.04_InterfaceDescription_UBX-21022436.pdf">Interface Document</a> defines two ways to receive data from an Ublox receiver: via NMEA and via UBX messages. They are two different types of protocols. The former is used since configuration requires UBX anyway. For details on the UBX protocol take a look at §3 of the Interface Document.</p>
 <p>When looking at the ways to configure the receiver, one would typically look at the messages under the &ldquo;UBX-CFG (0x06)&rdquo; section. However, they come with a warning:</p>
 <blockquote>
 <p>This message is deprecated in protocol versions greater than 23.01. Use UBX-CFG-VALSET, UBX-CFGVALGET, UBX-CFG-VALDEL instead. See the Legacy UBX Message Fields Reference for the corresponding configuration item.</p>
@@ -274,7 +274,7 @@
 <ol>
 <li>Powerup Built-In Test (<strong>PBIT</strong>): battery of tests that run when starting up the driver<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>. Also loads the receiver with application-specific configuration.</li>
 <li>Continuous Built-In Test (<strong>CBIT</strong>): launched automatically every X seconds from the first time an <strong>Operational</strong> mode occurs. They interrupt the normal operational mode to do some quick checks to assert the system is running well, and proceed to correct those that can be corrected and resume <strong>Operational</strong>, or to <strong>Failure</strong> if they can&rsquo;t.</li>
-<li>Initiated Built-In Test (<strong>IBIT</strong>): BIT mode initiated by the driver instance owner (can only be called upstream). Designed to force a hard reset and a do-over of the <strong>PBIT</strong> mode, when for some unknown reason the driver is not performing as expected.</li>
+<li>Initiated Built-In Test (<strong>IBIT</strong>): BIT mode initiated by the driver instance owner (can only be called upstream). Designed to force a hard reset and a do-over of the <strong>PBIT</strong> mode when, for some unknown reason, the driver is not performing as expected.</li>
 <li>Operational Mode (<strong>Operational</strong>): normal operational mode in which the driver does its main functions, like provide positioning, geofencing, etc. This state may transition to <strong>Failure</strong> or <strong>CBIT</strong> by itself, or to <strong>IBIT</strong> if asked by the driver instance owner.</li>
 <li>Failure Mode (<strong>Failure</strong>): no-return mode that captures the activities of the main <code>Run</code> method. If the driver ends up being integrated in a real receiver, this mode could alert upstream of the failure and the caller perhaps invoke an IBIT.</li>
 </ol>
@@ -292,7 +292,7 @@
 </span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#60a0b0;font-style:italic"># ---------------------------------------------</span>
 </span></span></code></pre></div><p>In addition to that, even though it&rsquo;s not needed by the language, I mimic C++ in the sense that all attributes used anywhere in the class are declared beforehand in the <code>__init__</code> method. This way, all attributes that could exist are easily identifiable and default initialized in one same place. They are all treated as private, in the sense that obtaining them should require a getter or a setter to modify their value.</p>
 <h4 id="class-attributes">Class attributes</h4>
-<p>Rather than copy pasting the typical UML class diagram for <code>GNSSDriver</code>, it makes more sense to explain the class attributes as groups, and elaborate on the purpose of each group. Going into the specific thing a variable does in that group overcomplicates the explanation. Besides, for sure you would do it in differently (better).</p>
+<p>Rather than copy pasting the typical UML class diagram for <code>GNSSDriver</code>, it makes more sense to explain the class attributes as groups, and elaborate on the purpose of each group. Going into the specific thing a variable does in that group overcomplicates the explanation. Besides, for sure you would do it differently (better).</p>
 <p>Block of class attributes used for:</p>
 <ol>
 <li><strong>USB connectivity-related variables</strong>.</li>
@@ -301,7 +301,7 @@
 <li><strong>RX internal data</strong>: internal data we know from the RX, each variable updated in a different operational mode in no particular order. But at least all RX info is packed here.</li>
 <li><strong>Analytics</strong>: for tracking count of checksum errors and worst case execution times.</li>
 <li><strong>Driver&rsquo;s Finite State Machine (FSM)</strong>: self-explanatory.</li>
-<li><strong>The Config Handler</strong>: internal data of the piece of code in charge of reading, checking and updating RX configuration as desired. It&rsquo;s complicated and will have its own blog entry later on.</li>
+<li><strong>The Config Handler</strong>: internal data of the piece of code in charge of reading, checking and updating RX configuration as desired. It&rsquo;s complicated and will have its <a href="https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-mode-handling-pbit/#config-control">own blog entry</a>.</li>
 <li><strong>Internal variables for BIT</strong>: I will explain it later, but the BIT (Built-In Test) is a set of checks that IBIT, PBIT and IBIT have in common. It is not a mode in of itself.</li>
 <li><strong>Internal variables for PBIT</strong>: also includes the &ldquo;ascfg&rdquo;, or <em>Application-Specific Config</em>, which is a dictionary with all configuration values that differ from the defaults declared in the ICD and need to be configured into the RX.</li>
 <li><strong>Internal variables for CBIT</strong>: also includes the &ldquo;defcfg&rdquo;, or <em>Default Config</em>, which is a dictionary with <em>all</em> configuration values (minus application-specific) declared in the ICD and the default value they should be having in memory. Used to check no external entity changed them.</li>
@@ -325,7 +325,7 @@ Note that this function will place the <code>_read_loop()</code> method in a sep
 </ol>
 </li>
 </ol>
-<p>If the reader takes a look at the code, he will see that there are some other public methods that can launched depending on user input via the same terminal the program is running. Those are:</p>
+<p>If the reader takes a look at the code, he will see that there are some other public methods that can be launched depending on user input via the same terminal the program is running. Those are:</p>
 <ol>
 <li><code>launch_ibit()</code>: mentioned above, the IBIT is called by the instance owner of the class. That&rsquo;s you, at your discretion. Typing &ldquo;ibit&rdquo; in upper or lowercase wil trigger it.</li>
 <li><code>activate_geofence()</code> and <code>deactivate_geofence()</code>: this is still a work in progress, but it&rsquo;s intended to set up a perimeter surrounding the location of the beacon (which will be static mostly) and alert when it exits said perimeter, because of a theft for instance.</li>

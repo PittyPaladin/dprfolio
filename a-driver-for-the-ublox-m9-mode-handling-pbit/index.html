@@ -281,24 +281,25 @@
 <h2 id="the-full-pbit-diagram">The full PBIT diagram</h2>
 <p>I have prepared a diagram showing all the previously defined steps in the PBIT:</p>
 
-
-<div class="wideimg" style="width: 150%;">
-  <img src="pbit_flow.png" alt="Steps of the PBIT, diagram">
+<div class="wideimg-outer">
+  <div class="wideimg" style="width: 150%;">
+    <img src="pbit_flow.png" alt="Steps of the PBIT, diagram">
+  </div>
 </div>
 
 <style>
-.wideimg {
-  margin-left: 50%;
-  transform: translateX(-50%);
+.wideimg-outer {
+  overflow-x: auto;
 }
-
+.wideimg {
+  margin: 0 auto;
+}
 .wideimg img {
   width: 100%;
   height: auto;
   display: block;
 }
 </style>
-
 <h2 id="config-control">Config Control</h2>
 <p>As mentioned before, <code>cfg_ctrl</code> loads an input database of configuration items. In my implementation, the database is a python dictionary. The dictionary keys are the items that need configuring, as the 4 byte Key ID you can find in the ICD. The corresponding value is another dictionary, which contains:</p>
 <ul>
@@ -323,24 +324,25 @@
 <p><strong><em>NOTE:</em></strong>  I&rsquo;ve skimmed this detail in the explanation to avoid confusion on an already hard algorithm to understand, but Config control will apply your configuration on all memory layers. That includes flash. We know one can not go on doing thousands of writes to flash or it will wear out and stop working. This won&rsquo;t be the case: when running the driver for the first time you will indeed write to flash, but after a reboot, config control will check the flash configuration and not write it if already has the value you wanted.</p>
 </blockquote>
 
-
-<div class="wideimg" style="width: 220%;">
-  <img src="cfg_ctrl.png" alt="Config Control diagram">
+<div class="wideimg-outer">
+  <div class="wideimg" style="width: 220%;">
+    <img src="cfg_ctrl.png" alt="Config Control diagram">
+  </div>
 </div>
 
 <style>
-.wideimg {
-  margin-left: 50%;
-  transform: translateX(-50%);
+.wideimg-outer {
+  overflow-x: auto;
 }
-
+.wideimg {
+  margin: 0 auto;
+}
 .wideimg img {
   width: 100%;
   height: auto;
   display: block;
 }
 </style>
-
 
 </content>
 

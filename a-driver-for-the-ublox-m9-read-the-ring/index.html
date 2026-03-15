@@ -42,7 +42,7 @@
   <meta itemprop="description" content="Article explaining the development environment of a driver project for a commercial GNSS receiver. This article specifically explains how data is read from the receiver and its contents parsed.">
   <meta itemprop="datePublished" content="2026-01-15T00:00:00+00:00">
   <meta itemprop="dateModified" content="2026-01-15T00:00:00+00:00">
-  <meta itemprop="wordCount" content="1661">
+  <meta itemprop="wordCount" content="1659">
   <meta itemprop="image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
   <meta itemprop="keywords" content="Gnss,Ublox,Receiver,Driver">
 <meta name="referrer" content="no-referrer-when-downgrade" />
@@ -243,7 +243,7 @@
 </p>
 
 <content>
-  <p>In the <a href="https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-development-environment/">last article</a> I mentioned that calling <code>driver.connect()</code> triggers a thread with the only purpose of reading the serial data and placing it into a buffer ring. A ring buffer (or circular buffer) is a fixed‑size array that treats its ends as connected. When you reach the end, you wrap around to the beginning. This shouldn&rsquo;t happen, of course, since it would mean data loss. You need to to consume faster than loading. In the code I have used Python&rsquo;s <code>deque</code> with a maximum length of 1024 bytes. During my testing this has proven to be enough, but it&rsquo;s possible that if you activate the highest refresh rates on many message types at the same time it could loose data.</p>
+  <p>In the <a href="https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-development-environment/">last article</a> I mentioned that calling <code>driver.connect()</code> triggers a thread with the only purpose of reading the serial data and placing it into a ring buffer. A ring buffer (or circular buffer) is a fixed‑size array that treats its ends as connected. When you reach the end, you wrap around to the beginning. This shouldn&rsquo;t happen, of course, since it would mean data loss. You need to consume faster than loading. In the code I have used Python&rsquo;s <code>deque</code> with a maximum length of 1024 bytes. During my testing this has proven to be enough, but it&rsquo;s possible that if you activate the highest refresh rates on many message types at the same time it could loose data.</p>
 <p>In this article I will explain the second to last function inside the <code>Run()</code> method: <code>read_rx_ring()</code>.</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span><span style="color:#007020;font-weight:bold">def</span> <span style="color:#06287e">Run</span>(<span style="color:#007020">self</span>):
 </span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>    runStartTs <span style="color:#666">=</span> time<span style="color:#666">.</span>monotonic()
@@ -304,9 +304,9 @@
 </span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29</span><span>                <span style="color:#007020;font-weight:bold">else</span>:
 </span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30</span><span>                    logger<span style="color:#666">.</span>critical(<span style="color:#4070a0">&#34;[FAIL] Wrong parser state&#34;</span>)
 </span></span></code></pre></div><h2 id="the-parser-state-machine">The parser state machine</h2>
-<p>The main issue is how many bytes to read from the queue, i.e. the class attribute <code>self.ringBytesToRead_</code>. The variable is instantiated at 1, so at the very first call of <code>read_rx_ring</code> only 1 byte is read. It is stored in a temporary message buffer, which will get parsed by one function or another depending on the parser state. The parser state (machine) is the expected meaning of the incoming bytes. In other words, if the byte just popped is expected to be the header of a message, its payload, or whatever. At the first iteration, being unknown the expected meaning of that 1 byte read, it is parsed as &ldquo;eParserNone&rdquo;. If you look into the function, you will see that if checks for the first UBX preamble synch char, 0xb5. If the byte equals that, the parser state is moved into the next stage, which is &ldquo;eParserUBX_SyncChar2&rdquo;. In other words: now the next byte you read will be expected to the the second synch char.</p>
+<p>The main issue is how many bytes to read from the queue, i.e. the class attribute <code>self.ringBytesToRead_</code>. The variable is instantiated at 1, so at the very first call of <code>read_rx_ring</code> only 1 byte is read. It is stored in a temporary message buffer, which will get parsed by one function or another depending on the parser state. The parser state (machine) is the expected meaning of the incoming bytes. In other words, if the byte just popped is expected to be the header of a message, its payload, or whatever. At the first iteration, being unknown the expected meaning of that 1 byte read, it is parsed as &ldquo;eParserNone&rdquo;. If you look into the function, you will see that if checks for the first UBX preamble synch char, 0xb5. If the byte equals that, the parser state is moved into the next stage, which is &ldquo;eParserUBX_SyncChar2&rdquo;. In other words: now the next byte you read will be expected to the second synch char.</p>
 <p><img src="ubx_frame.png" alt="alt text" title="UBX frame structure"></p>
-<p>The UBX is not the only protocol used by the receiver. NMEA is also used. It being ascii and starting by &lsquo;$&rsquo;, the <code>parseNone</code> function also checks for that. At the end of the function the variable <code>self.ringBytesToRead_</code> is set to 1, meaning that in the next pop we only want 1 byte (again, the second synch char or the next NMEA character).</p>
+<p>The UBX is not the only protocol used by the receiver. NMEA is also used. It being <a href="https://en.wikipedia.org/wiki/ASCII#Printable_character_table">ASCII</a> and starting by &lsquo;$&rsquo;, the <code>parseNone</code> function also checks for that. At the end of the function the variable <code>self.ringBytesToRead_</code> is set to 1, meaning that in the next pop we only want 1 byte (again, the second synch char or the next NMEA character).</p>
 <p>In the event that the first and second sync characters of the UBX frame structure are found, the bytes to read from the queue at the next iteration are 4: Message Class (1 byte), Message ID (1 byte) and Payload Length (2 bytes). Parser state is changed to <code>eParserUBX_PayloadLen</code>.
 When parsing that, the first thing to do is check that the Message Class &amp; ID are recognized. They are listed under <strong>§3.8 UBX messages overview</strong> of the ICD, and I&rsquo;ve put them in Python as a nested list. The list&rsquo;s first index contains the classes, and each class contains a list with its IDs. This way, checking if a message Class/ID pair exists is as easy as doing:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#007020;font-weight:bold">def</span> <span style="color:#06287e">validUbxClassAndID</span>(<span style="color:#007020">self</span>, msg_class, msg_id):
@@ -323,29 +323,30 @@ When parsing that, the first thing to do is check that the Message Class &amp; I
 </span></span></code></pre></div><p>Note that since the polling message doesn&rsquo;t have anything in the payload that is dynamic or can vary, the checksum for this message will always be the same. You can compute it by hand calling the function <code>computeUbxCRC</code>. But the neat trick is letting u-center compute it for you.</p>
 <p>If you are a visual learner like me, I&rsquo;ve drawn a diagram of the parser state machine below. I think it&rsquo;s easier to understand rather than looking at the code.</p>
 
-
-<div class="wideimg" style="width: 250%;">
-  <img src="parse_readring.png" alt="Parser state machine diagram">
+<div class="wideimg-outer">
+  <div class="wideimg" style="width: 350%;">
+    <img src="parse_readring.svg" alt="Parser state machine diagram">
+  </div>
 </div>
 
 <style>
-.wideimg {
-  margin-left: 50%;
-  transform: translateX(-50%);
+.wideimg-outer {
+  overflow-x: auto;
 }
-
+.wideimg {
+  margin: 0 auto;
+}
 .wideimg img {
   width: 100%;
   height: auto;
   display: block;
 }
 </style>
-
 <h3 id="wait-a-minute">Wait a minute&hellip;</h3>
 <p>You may be asking <em>that parsing method is all good and well when no bytes are lost, but what if they do?</em> Let&rsquo;s analyze what would happen if a byte (or more than one) is lost at any point:</p>
 <ul>
 <li>Byte lost at <code>eParserNone</code>: if byte read was going to be the 1st synch char but got lost, the loop will keep on reading messages until it reaches the next message. If that one is not corrupted, it will parse it.</li>
-<li>Byte lost at <code>eParserUBX_SyncChar2</code>: synch char 1 was read, and then but should have been synch char 2 got lost/corrupted. In that case, parser will back to mode <code>eParserNone</code> and keep reading bytes one by one until it find a synch char 1 again at the next message.</li>
+<li>Byte lost at <code>eParserUBX_SyncChar2</code>: synch char 1 was read, and then but should have been synch char 2 got lost/corrupted. In that case, parser will back to mode <code>eParserNone</code> and keep reading bytes one by one until it finds a synch char 1 again at the next message.</li>
 <li>Byte lost at <code>eParserUBX_PayloadLen</code>: if byte is lost/corrupted in any of the 4 bytes that compose Class/Id and Payload Length, the most likely scenario is that Class, ID or both are not recognized. If Payload Length is wrong, then the parser will go on to <code>eParserUBX_Payload</code> with a wrong length, which will cause a checksum miss. This will discard the message and put the parser back to <code>eParserNone</code>.</li>
 </ul>
 <h3 id="you-didnt-talk-about-nmea-parsing">You didn&rsquo;t talk about NMEA parsing&hellip;</h3>
