@@ -11,8 +11,7 @@
 <meta name="description" content="Who am I?
 
   
-  
-    I&rsquo;m David Pérez, an engineer living in the beautiful city of Barcelona, Spain. I hold a BSc in Aerospace Engineering and a MSc in Automatic Control, both from the Polytechnic University of Catalonia. I have some experience in Computer Vision (both Deep Learning and traditional), but most of my career has been revolving the different technical layers that compose modern Satellite Navigation Receivers, aka GNSS.
+  I&rsquo;m David Pérez, an engineer living in the beautiful city of Barcelona, Spain. I hold a BSc in Aerospace Engineering and a MSc in Automatic Control, both from the Polytechnic University of Catalonia. I have some experience in Computer Vision (both Deep Learning and traditional), but most of my career has been revolving the different technical layers that compose modern Satellite Navigation Receivers, aka GNSS.
 That includes embedded software running on real-time systems; integrating third-party sensors, like commercial GNSS receivers and inertial sensors; sensor fusion; and raw satellite RF measurement and data extraction." />
 <meta name="keywords" content="" />
 
@@ -171,6 +170,9 @@ That includes embedded software running on real-time systems; integrating third-
     overflow-x: auto;
     color: #444
   }
+  .highlight pre {
+    min-width: max-content;
+  }
 
    
   ul.blog-posts {
@@ -235,38 +237,27 @@ That includes embedded software running on real-time systems; integrating third-
   <h2 id="who-am-i">Who am I?</h2>
 <div class="bio">
   <img src="/dprfolio/images/me.png" alt="Photo of me" class="bio-photo">
-  <p>
-    <p>I&rsquo;m David Pérez, an engineer living in the beautiful city of Barcelona, Spain. I hold a BSc in Aerospace Engineering and a MSc in Automatic Control, both from the <a href="https://www.upc.edu/en">Polytechnic University of Catalonia</a>. I have some experience in Computer Vision (both Deep Learning and traditional), but most of my career has been revolving the different technical layers that compose modern Satellite Navigation Receivers, aka <a href="https://en.wikipedia.org/wiki/Satellite_navigation">GNSS</a>.</p>
+  <div class="bio-text"><p>I&rsquo;m David Pérez, an engineer living in the beautiful city of Barcelona, Spain. I hold a BSc in Aerospace Engineering and a MSc in Automatic Control, both from the <a href="https://www.upc.edu/en">Polytechnic University of Catalonia</a>. I have some experience in Computer Vision (both Deep Learning and traditional), but most of my career has been revolving the different technical layers that compose modern Satellite Navigation Receivers, aka <a href="https://en.wikipedia.org/wiki/Satellite_navigation">GNSS</a>.</p>
 <p>That includes embedded software running on real-time systems; integrating third-party sensors, like commercial GNSS receivers and inertial sensors; sensor fusion; and raw satellite RF measurement and data extraction.</p>
 <p>If you like what you see and think that we could work together, feel free to contact me.</p>
-
-  </p>
+</div>
 </div>
 
 <style>
 
-.bio-photo {
-  float: right;
-  max-width: 250px;      
-  margin: 0 0 1rem 1rem;  
-  border-radius: 4px;   
+@media (min-width: 600px) {
+  .bio-photo {
+    float: right;
+    width: 250px;
+    margin: 0 0 1rem 1.5rem;
+  }
 }
 
-.bio-img {
-  width: 280px;
-  height: auto;
-  border-radius: 4px;
-}
-
-.bio-text {
-  flex: 1;
-}
-
- 
 @media (max-width: 600px) {
-  .bio {
-    flex-direction: column;
-    text-align: center;
+  .bio-photo {
+    display: block;
+    width: 250px;
+    margin: 0 auto 0;
   }
 }
 </style>

@@ -173,6 +173,9 @@
     overflow-x: auto;
     color: #444
   }
+  .highlight pre {
+    min-width: max-content;
+  }
 
    
   ul.blog-posts {
@@ -251,11 +254,11 @@
 </ul>
 <h2 id="software-set-up">Software set up</h2>
 <p>Being Python the programming language of choice, create a virtual environment to avoid polluting the base installation. You may use <code>pip</code>, but I used <code>conda</code> like so:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#888">conda create --name myEnvName python=3.11
-</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#888">conda activate myEnvName
-</span></span></span></code></pre></div><p>Then proceed to install the only third-party dependency of this project, <code>pyserial</code>, which will abstract and encapsulate all serial port functionality and be OS-independent.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#888">conda install -c conda-forge pyserial
-</span></span></span></code></pre></div><p>If it&rsquo;s your first time hearing about <code>pyserial</code> I first recommend playing with its main methods, and perhaps reading some traces like the NMEA messages the receiver outputs by default.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span>conda create --name myEnvName python=3.11
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>conda activate myEnvName
+</span></span></code></pre></div><p>Then proceed to install the only third-party dependency of this project, <code>pyserial</code>, which will abstract and encapsulate all serial port functionality and be OS-independent.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-console" data-lang="console"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span>conda install -c conda-forge pyserial
+</span></span></code></pre></div><p>If it&rsquo;s your first time hearing about <code>pyserial</code> I first recommend playing with its main methods, and perhaps reading some traces like the NMEA messages the receiver outputs by default.</p>
 <p>From this point on it is assumed some knowledge of the built-in and third-party libraries that I will be mentioning. This will take the shape more of a &ldquo;look how I did it&rdquo; than a tutorial.</p>
 <p>You can see the code in the Github repo <a href="https://github.com/PittyPaladin/ubloxTalker">here</a>.</p>
 <h3 id="some-notes-on-the-interface-document">Some notes on the Interface Document</h3>
@@ -285,11 +288,11 @@
 <p><img src="m9state_trans.drawio.png" alt="alt text" title="Title"></p>
 <h3 id="scaffolding">Scaffolding</h3>
 <p>I&rsquo;m using an object oriented approach. There&rsquo;s a <code>GNSSDriver</code> class that encapsulates all attributes it may have and provides all the public methods needed to use it. In Python there&rsquo;s no such thing as &ldquo;public&rdquo; and &ldquo;private&rdquo; methods/attributes as in C++. Everything is public. Still, I like to make the differentiation in the comments (some people add underscores to indicate it) with:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#60a0b0;font-style:italic"># Public member functions</span>
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#60a0b0;font-style:italic"># ---------------------------------------------</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#75715e"># Public member functions</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#75715e"># ---------------------------------------------</span>
 </span></span></code></pre></div><p>and</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#60a0b0;font-style:italic"># Private member functions</span>
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#60a0b0;font-style:italic"># ---------------------------------------------</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#75715e"># Private member functions</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#75715e"># ---------------------------------------------</span>
 </span></span></code></pre></div><p>In addition to that, even though it&rsquo;s not needed by the language, I mimic C++ in the sense that all attributes used anywhere in the class are declared beforehand in the <code>__init__</code> method. This way, all attributes that could exist are easily identifiable and default initialized in one same place. They are all treated as private, in the sense that obtaining them should require a getter or a setter to modify their value.</p>
 <h4 id="class-attributes">Class attributes</h4>
 <p>Rather than copy pasting the typical UML class diagram for <code>GNSSDriver</code>, it makes more sense to explain the class attributes as groups, and elaborate on the purpose of each group. Going into the specific thing a variable does in that group overcomplicates the explanation. Besides, for sure you would do it differently (better).</p>

@@ -173,6 +173,9 @@
     overflow-x: auto;
     color: #444
   }
+  .highlight pre {
+    min-width: max-content;
+  }
 
    
   ul.blog-posts {
@@ -254,11 +257,11 @@
 <li>
 <p><strong>Configuration Control</strong>. Same as <a href="https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-mode-handling-pbit/">PBIT</a>, but instead of applying the application-specific configuration, you check that <em>the rest</em> of the config items remain at their default values. That can be very useful if someone connected to the receiver via a port reserved for debug and changed some defaults and forgot to revert them before fielding the unit back again. This has actually happened to me in the past, using a MosaicX5 from Septentrio.</p>
 <p>Now, does this mean that I have parsed <em>all</em> the configuration items in the ICD and put their default values as expected values, like this?</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span>    <span style="color:#40a070">0x10780001</span>: {
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>    <span style="color:#4070a0">&#34;name&#34;</span>:<span style="color:#4070a0">&#34;CFG-USBOUTPROT-UBX&#34;</span>,
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    <span style="color:#4070a0">&#34;type&#34;</span>: <span style="color:#4070a0">&#34;L&#34;</span>,
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>    <span style="color:#4070a0">&#34;expectedVal&#34;</span>: <span style="color:#40a070">1</span>, <span style="color:#60a0b0;font-style:italic"># &lt;-- the default in the ICD</span>
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span>    <span style="color:#4070a0">&#34;actualVal&#34;</span>: CFG_VAL_UNKNOWN,
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span>    <span style="color:#ae81ff">0x10780001</span>: {
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>    <span style="color:#e6db74">&#34;name&#34;</span>:<span style="color:#e6db74">&#34;CFG-USBOUTPROT-UBX&#34;</span>,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    <span style="color:#e6db74">&#34;type&#34;</span>: <span style="color:#e6db74">&#34;L&#34;</span>,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>    <span style="color:#e6db74">&#34;expectedVal&#34;</span>: <span style="color:#ae81ff">1</span>, <span style="color:#75715e"># &lt;-- the default in the ICD</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span>    <span style="color:#e6db74">&#34;actualVal&#34;</span>: CFG_VAL_UNKNOWN,
 </span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span>},
 </span></span></code></pre></div><p>Yes, yes I have. Good thing LLMs can parse PDFs pretty good.</p>
 </li>
