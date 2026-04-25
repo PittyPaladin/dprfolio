@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="shortcut icon" href="https://PittyPaladin.github.io/dprfolio/images/favicon.png" />
+<title>GPS L1 C/A Acquisition accelerated with CUDA | David&#39;s Archives</title>
+<meta name="title" content="GPS L1 C/A Acquisition accelerated with CUDA" />
+<meta name="description" content="Article explaining how I ported the GPS L1 C/A acquisition from GNSS-DSP-tools (by Peter Monta) to code that can be accelerated with an Nvidia GPU using CUDA" />
+<meta name="keywords" content="GNSS,GPS L1 C/A,RF,Acquisiton,CUDA,NVIDIA," />
+
+
+<meta property="og:url" content="https://PittyPaladin.github.io/dprfolio/gps-l1-c/a-acquisition-accelerated-with-cuda/">
+  <meta property="og:site_name" content="David&#39;s Archives">
+  <meta property="og:title" content="GPS L1 C/A Acquisition accelerated with CUDA">
+  <meta property="og:description" content="Article explaining how I ported the GPS L1 C/A acquisition from GNSS-DSP-tools (by Peter Monta) to code that can be accelerated with an Nvidia GPU using CUDA">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="blog">
+    <meta property="article:published_time" content="2026-04-20T00:00:00+00:00">
+    <meta property="article:modified_time" content="2026-04-20T00:00:00+00:00">
+    <meta property="article:tag" content="GNSS">
+    <meta property="article:tag" content="GPS L1 C/A">
+    <meta property="article:tag" content="RF">
+    <meta property="article:tag" content="Acquisiton">
+    <meta property="article:tag" content="CUDA">
+    <meta property="article:tag" content="NVIDIA">
+    <meta property="og:image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+
+
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+  <meta name="twitter:title" content="GPS L1 C/A Acquisition accelerated with CUDA">
+  <meta name="twitter:description" content="Article explaining how I ported the GPS L1 C/A acquisition from GNSS-DSP-tools (by Peter Monta) to code that can be accelerated with an Nvidia GPU using CUDA">
+
+
+
+
+  <meta itemprop="name" content="GPS L1 C/A Acquisition accelerated with CUDA">
+  <meta itemprop="description" content="Article explaining how I ported the GPS L1 C/A acquisition from GNSS-DSP-tools (by Peter Monta) to code that can be accelerated with an Nvidia GPU using CUDA">
+  <meta itemprop="datePublished" content="2026-04-20T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2026-04-20T00:00:00+00:00">
+  <meta itemprop="wordCount" content="2399">
+  <meta itemprop="image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
+  <meta itemprop="keywords" content="GNSS,GPS L1 C/A,RF,Acquisiton,CUDA,NVIDIA">
+<meta name="referrer" content="no-referrer-when-downgrade" />
+
+  <style>
+  :root {
+    --width: 720px;
+    --font-main: Verdana, sans-serif;
+    --font-secondary: Verdana, sans-serif;
+    --font-scale: 1em;
+    --background-color: #fff;
+    --heading-color: #222;
+    --text-color: #444;
+    --link-color: #3273dc;
+    --visited-color: #8b6fcb;
+    --blockquote-color: #222;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background-color: #000000;
+      --heading-color: #eee;
+      --text-color: #ddd;
+      --link-color: #8cc2dd;
+      --visited-color: #8b6fcb;
+      --blockquote-color: #ccc;
+    }
+  }
+
+  body {
+    font-family: var(--font-secondary);
+    font-size: var(--font-scale);
+    margin: auto;
+    padding: 20px;
+    max-width: var(--width);
+    text-align: left;
+    background-color: var(--background-color);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5;
+    color: var(--text-color);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-main);
+    color: var(--heading-color);
+  }
+
+  a {
+    color: var(--link-color);
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  nav a {
+    margin-right: 15px;
+  }
+
+  strong,
+  b {
+    color: var(--heading-color);
+  }
+
+  button {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  time {
+    font-family: monospace;
+    font-style: normal;
+    font-size: 15px;
+  }
+
+  main {
+    line-height: 1.6;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  code {
+    font-family: monospace;
+    padding: 2px;
+    border-radius: 3px;
+  }
+
+  blockquote {
+    border-left: 1px solid #999;
+    color: var(--blockquote-color);
+    padding-left: 20px;
+    font-style: italic;
+  }
+
+  footer {
+    padding: 15px 0;
+    text-align: center;
+  }
+
+  .inline {
+    width: auto !important;
+  }
+
+  .highlight,
+  .code {
+    border-radius: 3px;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    overflow-x: auto;
+    color: #444
+  }
+  .highlight pre {
+    min-width: max-content;
+  }
+
+   
+  ul.blog-posts {
+    list-style-type: none;
+    padding: unset;
+  }
+
+  ul.blog-posts li {
+    display: flex;
+  }
+
+  ul.blog-posts li span {
+    flex: 0 0 130px;
+  }
+
+  ul.blog-posts li a:visited {
+    color: var(--visited-color);
+  }
+
+</style>
+
+</head>
+
+<body>
+  <header>
+
+<div class="site-header">
+  <a href="/dprfolio/" class="title">
+    <h1>David&#39;s Archives</h1>
+  </a>
+  <nav>
+<a href="/dprfolio/">Home</a>
+
+<a href="/dprfolio/about/">About</a>
+
+<a href="/dprfolio/blog/">Blog</a>
+
+</nav>
+</div>
+
+<style>
+.site-header {
+  border: 1px solid currentColor;
+  padding: 1rem;
+  margin-bottom: 2rem;  
+  text-align: center;
+}
+
+.title:hover {
+  text-decoration: none;
+}
+
+
+.title h1 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+</style></header>
+  <main>
+
+<h1>GPS L1 C/A Acquisition accelerated with CUDA</h1>
+<p>
+  <i>
+    <time datetime='2026-04-20'>
+      20 Apr, 2026
+    </time>
+  </i>
+</p>
+
+<content>
+  <h2 id="motivation">Motivation</h2>
+<p>The other day I was reading Daniel Estévez&rsquo;s <a href="https://destevez.net/2025/12/first-analysis-of-the-lunar-gnss-receiver-experiment-data/">post</a> about the <a href="https://etd.gsfc.nasa.gov/our-work/lunar-gnss-receiver-experiment-lugre/">Lunar GNSS Receiver Experiment (LuGRE)</a>, which is a project where NASA and the Italian Space Agency landed a GPS receiver on the moon. The receiver is also capable of recording, so in his post Daniel takes the IQ recordings and codes a CUDA-accelerated script to acquire the GPS satellites with high sensitivity. He goes on to explain the acquisition algorithm, the implementation and discusses the results. As per usual, it&rsquo;s very well written, I suggest you check it out.</p>
+<p>For the implementation, he starts-off with a proof of concept using Python and the CuPy library, which is a GPU array backend that implements a subset of the NumPy interface (and some SciPy too). It takes the NumPy functions you know and love and replicates them but running on the GPU instead of running on the CPU. To do it, CuPy utilizes the CUDA Toolkit libraries (like cuFFT, cuBLAS, etc). Once Daniel validates the proof of concept with the higher-level Python script, he goes on to write custom CUDA kernels.</p>
+<p>I’ve worked in the past with GPS tracking engines, but I’ve always wanted to spend time on the acquisition side. On top of that, I’ve been wanting to learn CUDA for quite a while. So reading Daniel’s post inspired me. I told myself: “grab Peter Monta’s <a href="https://github.com/pmonta/GNSS-DSP-tools">GNSS-DSP-tools</a> library, which is pretty standard (we use it where I work, and Daniel himself has used it in several posts) and port it to CuPy. That&rsquo;s a good learning exercise.”. This has the advantage that I can focus on the algorithmic part, since the library provides everything else. And if I end up getting good results, since it’s a well-known library, my code might be useful to someone. And of course, I stay in Python, so I don’t have to invest more time than I have into low-level CUDA kernels in C++.</p>
+<p>So, in summary:</p>
+<p><strong>This post&rsquo;s objective</strong>: To port <a href="https://github.com/pmonta/GNSS-DSP-tools/blob/master/acquire-gps-l1.py"><code>acquire-gps-l1.py</code></a> to CuPy. Profile and optimize it. Squeeze every millisecond to see if real-time could be achieved. But stay in Python. Most importantly, enjoy the process. And then, to show <em>you</em> the results.</p>
+<blockquote>
+<p><strong>Disclaimer:</strong> This is not a post showing state of the art results or anything better than what Daniel or Peter alread have, nor a rigorous implementation guideline. My knowledge is limited and it&rsquo;s my first time with CUDA. There may be mistakes. I just want to share my journey GPU-accelerating the GPS acquisition algorithm.</p>
+</blockquote>
+<h2 id="software-set-up">Software set up</h2>
+<ol>
+<li>Install CUDA on a CUDA-capable GPU, following the instructions from the <a href="https://www.google.com/url?sa=t&amp;source=web&amp;rct=j&amp;opi=89978449&amp;url=https://docs.nvidia.com/cuda/cuda-installation-guide-linux/">official CUDA website</a>. With the CUDA install will come the profiling tool, NVIDIA Nsight Systems.</li>
+<li>Then, install CuPy as detailed <a href="https://docs.cupy.dev/en/stable/install.html">here</a>. I recommend to do it in a virtual environment.</li>
+<li>Clone the GNSS-DSP-tools repo from <a href="https://github.com/pmonta/GNSS-DSP-tools">Peter Monta&rsquo;s github</a>.</li>
+<li>This <a href="cuAcq.py">post&rsquo;s script</a>.</li>
+</ol>
+<h2 id="testing-set-up">Testing set up</h2>
+<p>Also known as: how to iterate knowing the ground truth you&rsquo;re trying to reach. For this, I have also used one of Daniel Estevez&rsquo;s <a href="https://destevez.net/2022/03/timing-sdr-recordings-with-gps/">posts</a>. In it, he records some seconds of L1 and decodes the LNAV navigation data for timing purposes. But decoding is a different topic. What interests me is the first part, where he provides the RF recording at 4 Msps and runs it through the GNSS-DSP-tools acquisition algorithm. I have reproduced those results locally. Those are the results I will try to replicate with my GPU-accelerated version. I&rsquo;m copying them here for the reader&rsquo;s convenience:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span>$ ./acquire-gps-l1.py GPS-L1-2022-03-27.cs8 <span style="color:#ae81ff">4000000</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>prn   <span style="color:#ae81ff">1</span> doppler   600.0 metric  1.58 code_offset  393.4
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>prn   <span style="color:#ae81ff">2</span> doppler  1800.0 metric  3.19 code_offset  758.8
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>prn   <span style="color:#ae81ff">3</span> doppler -1200.0 metric  1.65 code_offset 1004.0
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>prn   <span style="color:#ae81ff">4</span> doppler  1000.0 metric  1.50 code_offset  475.0
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>prn   <span style="color:#ae81ff">5</span> doppler   800.0 metric  1.61 code_offset  964.8
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>prn   <span style="color:#ae81ff">6</span> doppler  1800.0 metric  1.54 code_offset  153.4
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>prn   <span style="color:#ae81ff">7</span> doppler -4200.0 metric  1.53 code_offset  259.5
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>prn   <span style="color:#ae81ff">8</span> doppler  -200.0 metric  1.53 code_offset  830.4
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>prn   <span style="color:#ae81ff">9</span> doppler  6800.0 metric  1.49 code_offset  134.6
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>prn  <span style="color:#ae81ff">10</span> doppler -7000.0 metric  1.58 code_offset  783.7
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>prn  <span style="color:#ae81ff">11</span> doppler  2400.0 metric  7.22 code_offset  185.8
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span>prn  <span style="color:#ae81ff">12</span> doppler  -200.0 metric  7.98 code_offset  151.6
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14</span><span>prn  <span style="color:#ae81ff">13</span> doppler   800.0 metric  1.62 code_offset  881.4
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15</span><span>prn  <span style="color:#ae81ff">14</span> doppler -1200.0 metric  1.50 code_offset  123.1
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16</span><span>prn  <span style="color:#ae81ff">15</span> doppler -4200.0 metric  1.53 code_offset  813.5
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17</span><span>prn  <span style="color:#ae81ff">16</span> doppler  -200.0 metric  1.53 code_offset  285.2
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18</span><span>prn  <span style="color:#ae81ff">17</span> doppler  3600.0 metric  1.47 code_offset  940.3
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19</span><span>prn  <span style="color:#ae81ff">18</span> doppler  1800.0 metric  1.51 code_offset  860.9
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20</span><span>prn  <span style="color:#ae81ff">19</span> doppler  3800.0 metric  1.51 code_offset  421.1
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21</span><span>prn  <span style="color:#ae81ff">20</span> doppler  1000.0 metric  1.59 code_offset  956.3
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22</span><span>prn  <span style="color:#ae81ff">21</span> doppler -5200.0 metric  1.58 code_offset  438.3
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23</span><span>prn  <span style="color:#ae81ff">22</span> doppler  2600.0 metric  5.33 code_offset  465.0
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24</span><span>prn  <span style="color:#ae81ff">23</span> doppler -4200.0 metric  1.59 code_offset  272.2
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25</span><span>prn  <span style="color:#ae81ff">24</span> doppler  3000.0 metric  1.55 code_offset  605.9
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26</span><span>prn  <span style="color:#ae81ff">25</span> doppler  1600.0 metric  6.99 code_offset  425.1
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27</span><span>prn  <span style="color:#ae81ff">26</span> doppler -5000.0 metric  1.52 code_offset  149.6
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28</span><span>prn  <span style="color:#ae81ff">27</span> doppler -1200.0 metric  1.48 code_offset  404.9
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29</span><span>prn  <span style="color:#ae81ff">28</span> doppler  2800.0 metric  1.51 code_offset  128.6
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30</span><span>prn  <span style="color:#ae81ff">29</span> doppler  4000.0 metric  1.65 code_offset  603.2
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31</span><span>prn  <span style="color:#ae81ff">30</span> doppler -2200.0 metric  1.50 code_offset 1012.0
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32</span><span>prn  <span style="color:#ae81ff">31</span> doppler  5200.0 metric  6.86 code_offset  559.7
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33</span><span>prn  <span style="color:#ae81ff">32</span> doppler  1000.0 metric  7.18 code_offset  680.3
+</span></span></code></pre></div><h2 id="implementation--results">Implementation &amp; results</h2>
+<h3 id="resampling">Resampling</h3>
+<p>Regardless of the sample rate of the recording, the script will resample to a canonical 4.096 Msps. That sample rate is high enough for the PRN code and a power of 2, required for FFT efficiency. As one can observe by looking at the code, the resampling has not been altered with respect to the original GNSS-DSP-tools script. Thus, it is computed on the CPU.</p>
+<p>If one looks at the time it takes to resample, it&rsquo;s more than 150 ms. The milliseconds of samples to run the acquisition is 80. Just the resampling on the CPU would prevent you to achieve real-time.</p>
+<p><img src="resample_prof.png" alt="Profiling of the resampler"></p>
+<p>The profiling tool is NVIDIA Nsight Systems. I use a simple bash script to (1) run the Python script in profile mode, (2) store the profiling stats with a fixed name (overwritting if the file existed in the directory) and (3) open those profiling stats with the tool. You may find it useful:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span>sudo nsys profile <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>  --output report.nsys-rep <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>  --force-overwrite<span style="color:#f92672">=</span>true <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>  --gpu-metrics-device<span style="color:#f92672">=</span>all <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span>  -t cuda,nvtx,osrt <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span>  /home/dmlb/.virtualenvs/cudaDev/bin/python cuAcq.py <span style="color:#f92672">&amp;&amp;</span><span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7</span><span>  nsys-ui report.nsys-rep
+</span></span></code></pre></div><h3 id="move-samples-to-gpu">Move samples to GPU</h3>
+<p>The interface to move an array into GPU memory is the same as NumPy: call <code>asarray</code> from CuPy, and it will move the data you give it (a list, a NumPy array, etc) to the GPU.</p>
+<p>Moving the 80 milliseconds (to perform non-coherent integration) on the resampled sample rate (of 4.096 Msps) means moving 5.24 MB of data. The driver first calls cudaHostAlloc, I assume to allocate enough bytes of host memory that is page-locked, accessible to the device. It takes more than 2 ms, which is quite a lot, but I assume that this only needs to be done once. If more batches of samples were to be used, they could use that same host memory. At any rate: this accelerates further calls to cudaMemcpyAsync, which you can see in red, very tiny, because it spans only ~30 us.</p>
+<p><img src="samples2gpu_prof.png" alt="Moving samples to GPU"></p>
+<h3 id="mixer">Mixer</h3>
+<p>GNSS-DSP-tools uses an NCO (Numerically-Controlled Oscillator) to mix signals. An NCO is a digital sine/cosine wave generator. When performing acquisition, you need to generate a local carrier replica to mix against (correlate with) the incoming signal to strip the carrier and find the doppler shift.</p>
+<p>The way it&rsquo;s performed is by precomputing one full cycle of a complex exponential (a phasor) at NT=1024 uniformly spaced points around the unit circle. It&rsquo;s just a lookup table (LUT) of cos + j·sin values, computed only once.</p>
+<p>Having the LUT computed, one calls the NCO with a frequency per sample <code>f</code>, a phase (in sample units) <code>p</code> and the number of samples <code>n</code> for which we will want to do the mixing. This will return an array of phasors were each sample you advance the phase by <code>f</code>. The NCO in GNSS-DSP-tools works by giving a doppler per sample. I have extended it so that you can pass an array of dopplers per sample (all doppler search bins, which in this case is from -7 KHz to +7 KHz in steps of 200 Hz).</p>
+<p>As the reader will see in the code, the LUT is computed once on the GPU. I haven&rsquo;t bothered on timing its computation, since it&rsquo;s lightweight and only computed once.</p>
+<p>What is computed on every acquisition step is the actual mixing. The mixer signals have been precomputed as I explained in the last paragraph, but the mixing is the multiplication of the input samples by the mixer signal. As you can see by looking at the code, I also transform it into the frequency domain by calling the FFT.</p>
+<p>In the following image I have pasted two identical runs of the mixer function. As you can see, the first one is an order of magnitude slower. That is because CUDA needs to load the module into the GPU, subsequent calls to the function will go much faster. In my use case, where I have a Laptop RTX 4060, a runtime of ~300 us is amazing in my humble opinion. Let us not remember that these 300 us include:</p>
+<ol>
+<li>Multiplying the input samples by all mixer signals (the whole doppler range of bins). This yields an array of shape (80, 70, 4096), where 80 is the accumulated ms for the acquisiton run, 70 the number of doppler bins in the range of -7 KHz to +7 KHz in steps of 200 Hz, and 4096 the samples in a millisecond. And;</li>
+<li>Running the FFT, which moves it into the frequency domain.</li>
+</ol>
+<p>Incredible what a &ldquo;cheap&rdquo; consumer-grade GPU is capable of. But that&rsquo;s not all, there&rsquo;s still the PRN search.</p>
+<p><img src="mixer_prof.png" alt="alt text"></p>
+<h3 id="prn-search">PRN search</h3>
+<p>The PRN codes are precomputed and transformed into the frequency domain by applying the FFT. The PRN codes are obtained using GNSS-DSP-tools&rsquo; <code>ca.code</code> function, and that is done for all 32 PRNs. Thus, the variable <code>ca_codes</code> you see in the code is a (32, 4096) array in the frequency domain that already resides in GPU memory. Every time you need a given PRN, you just index it from the array (note that PRNs start counting at 1 and array indexes at 0).</p>
+<p>When looking at the <code>search</code> function, you can see that no for loops are used. That&rsquo;s different with respect to Peter Monta&rsquo;s original implementation. That&rsquo;s mainly because the signal is already transformed into frequency domain with shape (ms_accumulated, doppler_bins, n_samples_1ms), which in this case is (80, 70, 4096). Thus, correlation by the PRN code (shaped (1, 4096)) for all milliseconds and all doppler bins is only a multiplication. Same thing with the inverse FFT needed to bring back the correlation results into the time domain. These massive computations, lovely abstracted by CuPy, are extremely optimized by CUDA. The only difficulty I found was understanding array indexing notation. That took some trial and error, but having the testing set up so that every step is comparable with what you get with GNSS-DSP-tools, it&rsquo;s doable.</p>
+<p>Performance-wise, a similar thing happens with the mixer: the first run is slow because CUDA has to load the module into the GPU, but subsequent runs are incredibly fast, with averages of ~700 us per PRN. Sub 1 millisecond per PRN is great, specially taking into account that a real receiver needn&rsquo;t have all PRNs under acquisition at the same time.</p>
+<p><img src="PRNSearch_prof.png" alt="Profiling of the PRN search"></p>
+<h2 id="acquisition-results">Acquisition results</h2>
+<p>Printing the results of the acquisition run with CUDA, in the same format as with GNSS-DSP-tools, looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span>prn   <span style="color:#ae81ff">1</span> doppler -3200.0 metric  1.54 code_offset  142.6
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>prn   <span style="color:#ae81ff">2</span> doppler  1800.0 metric  3.19 code_offset  758.8
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>prn   <span style="color:#ae81ff">3</span> doppler -1200.0 metric  1.65 code_offset 1004.0
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>prn   <span style="color:#ae81ff">4</span> doppler  6400.0 metric  1.39 code_offset  521.7
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>prn   <span style="color:#ae81ff">5</span> doppler   800.0 metric  1.61 code_offset  964.8
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>prn   <span style="color:#ae81ff">6</span> doppler  1800.0 metric  1.54 code_offset  153.4
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>prn   <span style="color:#ae81ff">7</span> doppler -3000.0 metric  1.38 code_offset  806.2
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>prn   <span style="color:#ae81ff">8</span> doppler  3600.0 metric  1.53 code_offset  147.9
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>prn   <span style="color:#ae81ff">9</span> doppler  4800.0 metric  1.48 code_offset  376.6
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>prn  <span style="color:#ae81ff">10</span> doppler -5200.0 metric  1.54 code_offset  544.0
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>prn  <span style="color:#ae81ff">11</span> doppler  2400.0 metric  7.22 code_offset  185.8
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>prn  <span style="color:#ae81ff">12</span> doppler  -200.0 metric  7.98 code_offset  151.6
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span>prn  <span style="color:#ae81ff">13</span> doppler   800.0 metric  1.62 code_offset  881.4
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14</span><span>prn  <span style="color:#ae81ff">14</span> doppler  6600.0 metric  1.41 code_offset  578.4
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15</span><span>prn  <span style="color:#ae81ff">15</span> doppler -4200.0 metric  1.53 code_offset  813.5
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16</span><span>prn  <span style="color:#ae81ff">16</span> doppler  4600.0 metric  1.41 code_offset  253.8
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17</span><span>prn  <span style="color:#ae81ff">17</span> doppler -4400.0 metric  1.42 code_offset  624.1
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18</span><span>prn  <span style="color:#ae81ff">18</span> doppler  1800.0 metric  1.51 code_offset  860.9
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19</span><span>prn  <span style="color:#ae81ff">19</span> doppler -5000.0 metric  1.48 code_offset  146.4
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20</span><span>prn  <span style="color:#ae81ff">20</span> doppler  2800.0 metric  1.54 code_offset  169.6
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21</span><span>prn  <span style="color:#ae81ff">21</span> doppler -5200.0 metric  1.58 code_offset  438.3
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22</span><span>prn  <span style="color:#ae81ff">22</span> doppler  2600.0 metric  5.33 code_offset  465.0
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23</span><span>prn  <span style="color:#ae81ff">23</span> doppler -7000.0 metric  1.53 code_offset  371.9
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24</span><span>prn  <span style="color:#ae81ff">24</span> doppler  2600.0 metric  1.52 code_offset  508.3
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25</span><span>prn  <span style="color:#ae81ff">25</span> doppler  1600.0 metric  6.99 code_offset  425.1
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26</span><span>prn  <span style="color:#ae81ff">26</span> doppler -2000.0 metric  1.29 code_offset  364.9
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27</span><span>prn  <span style="color:#ae81ff">27</span> doppler -1200.0 metric  1.48 code_offset  404.9
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28</span><span>prn  <span style="color:#ae81ff">28</span> doppler  6800.0 metric  1.51 code_offset  712.8
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29</span><span>prn  <span style="color:#ae81ff">29</span> doppler -3200.0 metric  1.50 code_offset  470.0
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30</span><span>prn  <span style="color:#ae81ff">30</span> doppler  6800.0 metric  1.45 code_offset  708.3
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31</span><span>prn  <span style="color:#ae81ff">31</span> doppler  5200.0 metric  6.86 code_offset  559.7
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32</span><span>prn  <span style="color:#ae81ff">32</span> doppler  1000.0 metric  7.18 code_offset  680.3
+</span></span></code></pre></div><p>The PRNs present in the recording are those with metrics above 2. Below 2, it&rsquo;s noise. They are: 2, 11, 12, 22, 25, 31 and 32. As you can see doppler, code delay and metric are exactly the same as in the original GNSS-DSP-tools script. The are value differences in the ones that are noise. I blame that to the lower resolution datatypes used in CUDA to speed computations (ie using a float where a double is overkill).</p>
+<h2 id="next-steps">Next steps</h2>
+<ol>
+<li>
+<p>Porting the resampler to the GPU: It&rsquo;s not straight away because <code>firwin</code> and <code>filtfilt</code> have not, to my knowledge, been implemented in CuPy. That requires me to do it by hand from lover level CuPy calls, which takes time, and I wanted to focus on the doppler and code delay part.</p>
+</li>
+<li>
+<p>Batching the PRN search: Instead of one call to <code>search</code> per PRN, it would be interesting to try and batch multiple PRN searches and do them in one call. Perhaps one call to cuFFT with a large array is faster than several calls with smaller arrays. It needs to be tested, I&rsquo;m not an expert on the optimizations of cuFFT.</p>
+</li>
+<li>
+<p>Dive deeper in the retrieval of data from GPU to CPU: when printing the acquisition results at the end, they are moved from the GPU to the CPU. This triggers a <code>cudaMemcpyAsync</code> of more than 150 ms, which I reckon is humongous for the little amount of data that is actually being moved.</p>
+</li>
+</ol>
+<p><img src="gpu2cpu_results_prof.png" alt="GPU to CPU copy of the acquisition results"></p>
+
+</content>
+
+<div style="font-size:0.8em;display:flex;gap:16px;justify-content:center;">
+  <p>
+    
+    <a href="https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-operational-mode/">
+      &lt;&lt; Previous Post</a>
+        
+  </p>
+  <p>|</p>
+  <p>
+    
+    <strike>Next Post >></strike>
+    
+  </p>
+</div>
+
+
+<p>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/gnss/">#GNSS</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/gps-l1-c/a/">#GPS L1 C/A</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/rf/">#RF</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/acquisiton/">#Acquisiton</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/cuda/">#CUDA</a>
+  
+  <a href="https://PittyPaladin.github.io/dprfolio/blog/nvidia/">#NVIDIA</a>
+  
+</p>
+
+  </main>
+  <footer>
+
+<footer>
+  <hr>
+
+  
+    <p>Copyright © 2026, David Pérez Ruiz.</p>
+  
+</footer>
+</footer>
+
+  
+</body>
+
+</html>

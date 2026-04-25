@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Gnss on David&#39;s Archives</title>
+    <title>GNSS on David&#39;s Archives</title>
     <link>https://PittyPaladin.github.io/dprfolio/blog/gnss/</link>
-    <description>Recent content in Gnss on David&#39;s Archives</description>
+    <description>Recent content in GNSS on David&#39;s Archives</description>
     <generator>Hugo</generator>
     <language>en-US</language>
     <copyright>Copyright © 2026, David Pérez Ruiz.</copyright>
-    <lastBuildDate>Tue, 03 Mar 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 20 Apr 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://PittyPaladin.github.io/dprfolio/blog/gnss/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>GPS L1 C/A Acquisition accelerated with CUDA</title>
+      <link>https://PittyPaladin.github.io/dprfolio/gps-l1-c/a-acquisition-accelerated-with-cuda/</link>
+      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>https://PittyPaladin.github.io/dprfolio/gps-l1-c/a-acquisition-accelerated-with-cuda/</guid>
+      <description>&lt;h2 id=&#34;motivation&#34;&gt;Motivation&lt;/h2&gt;&#xA;&lt;p&gt;The other day I was reading Daniel Estévez&amp;rsquo;s &lt;a href=&#34;https://destevez.net/2025/12/first-analysis-of-the-lunar-gnss-receiver-experiment-data/&#34;&gt;post&lt;/a&gt; about the &lt;a href=&#34;https://etd.gsfc.nasa.gov/our-work/lunar-gnss-receiver-experiment-lugre/&#34;&gt;Lunar GNSS Receiver Experiment (LuGRE)&lt;/a&gt;, which is a project where NASA and the Italian Space Agency landed a GPS receiver on the moon. The receiver is also capable of recording, so in his post Daniel takes the IQ recordings and codes a CUDA-accelerated script to acquire the GPS satellites with high sensitivity. He goes on to explain the acquisition algorithm, the implementation and discusses the results. As per usual, it&amp;rsquo;s very well written, I suggest you check it out.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>A driver for the Ublox M9: Operational mode</title>
       <link>https://PittyPaladin.github.io/dprfolio/a-driver-for-the-ublox-m9-operational-mode/</link>
