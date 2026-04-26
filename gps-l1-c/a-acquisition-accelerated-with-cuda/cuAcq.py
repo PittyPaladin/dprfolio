@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import cupy as cp
 import matplotlib.pyplot as plt
@@ -11,14 +12,6 @@ sys.path.append("../GNSS-DSP-tools")
 import gnsstools.gps.ca as ca
 import gnsstools.io as io
 
-NT = 1024
-nco_table_gpu = cp.exp(2 * cp.pi * 1j * cp.arange(NT) / NT)
-
-def nco_gpu_matrix_lut(f, p, n):
-    idx = p + f*cp.arange(n)[:, None]
-    idx = cp.floor(idx * NT).astype(cp.int32)
-    idx = cp.mod(idx, NT)
-    return nco_table_gpu[idx]
 
 def resample(x):
     fsr = 4096000.0/fs
@@ -112,10 +105,16 @@ if __name__ == "__main__":
     x_gpu = cp.asarray(x[:n1ms*ms], 'complex64') # move samples to GPU
     cp.cuda.nvtx.RangePop()
 
-    # [3] Signal NCO mixing with all dopplers, in frequency domain
-    cp.cuda.nvtx.RangePush(f"Mixer->LoadModule")
-    sig_mixed_f = nco_mix_signal(x_gpu, nco_lut) # dummy to load
+    # Force module load to GPU to have realistic timings
+    cp.cuda.nvtx.RangePush(f"Mixer-LoadModule")
+    sig_mixed_f = nco_mix_signal(x_gpu, nco_lut) # dummy to load module
     cp.cuda.nvtx.RangePop()
+    cp.cuda.nvtx.RangePush(f"Search-LoadModule")
+    metric, code, doppler = search(sig_mixed_f, ca_codes_f[0]) # dummy to load module
+    cp.cuda.nvtx.RangePop()
+
+    # [3] Signal NCO mixing with all dopplers, in frequency domain
+    start = time.perf_counter()
     cp.cuda.nvtx.RangePush(f"Mixer")
     sig_mixed_f = nco_mix_signal(x_gpu, nco_lut)
     cp.cuda.nvtx.RangePop()
@@ -132,9 +131,10 @@ if __name__ == "__main__":
             "code" : code,
             "doppler" : doppler
         }
+    end = time.perf_counter()
 
     # Display results
     for prn, result in results.items():
         print(f"prn {prn:3d} doppler {result['doppler']:7.1f} metric {result['metric']:5.2f} code_offset {result['code']:6.1f}")
 
-
+    print(f"Function took {end - start:.6f} seconds")
