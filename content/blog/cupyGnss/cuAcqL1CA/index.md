@@ -132,7 +132,7 @@ The PRN codes are precomputed and transformed into the frequency domain by apply
 
 When looking at the `search` function, you can see that no for loops are used. That's different with respect to Peter Monta's original implementation. That's mainly because the signal is already transformed into frequency domain with shape (ms_accumulated, doppler_bins, n_samples_1ms), which in this case is (80, 70, 4096). Thus, correlation by the PRN code (shaped (1, 4096)) for all milliseconds and all doppler bins is only a multiplication. Same thing with the inverse FFT needed to bring back the correlation results into the time domain. These massive computations, lovely abstracted by CuPy, are extremely optimized by CUDA. The only difficulty I found was understanding array indexing notation. That took some trial and error, but having the testing set up so that every step is comparable with what you get with GNSS-DSP-tools, it's doable.
 
-Performance-wise, a similar thing happens with the mixer: the first run is slow because CUDA has to load the module into the GPU, but subsequent runs are incredibly fast, with averages of ~700 us per PRN. Sub 1 millisecond per PRN is great, specially taking into account that a real receiver needn't have all PRNs under acquisition at the same time.
+Performance-wise, a similar thing happens with the mixer: the first run is slow because CUDA has to load the module into the GPU, but subsequent runs are incredibly fast, with averages of **~700 us per PRN**. Sub 1 millisecond per PRN is great, specially taking into account that a real receiver needn't have all PRNs under acquisition at the same time.
 
 ![Profiling of the PRN search](PRNSearch_prof.png)
 
@@ -176,6 +176,14 @@ prn  32 doppler  1000.0 metric  7.18 code_offset  680.3
 ```
 
 The PRNs present in the recording are those with metrics above 2. Below 2, it's noise. They are: 2, 11, 12, 22, 25, 31 and 32. As you can see doppler, code delay and metric are exactly the same as in the original GNSS-DSP-tools script. The are value differences in the ones that are noise. I blame that to the lower resolution datatypes used in CUDA to speed computations (ie using a float where a double is overkill).
+
+## The time difference
+
+On my PC, running Peter Monta's `acquire-gps-l1.py` for all 32 PRNs takes around **~3.5 seconds**. Note that he uses the multiprocessing library to make use of the different cores in your computer, so you mileage may vary. Running my CUDA-accelerated version of his script takes **~20 milliseconds** on the RTX 4060.
+
+> Note 1: In neither the time of the resampling has been taken into account.
+
+> Note 2: You will see that, in order to get representative timings, I have forced the load of some modules previous to starting the timer. It is marked in the code comments.
 
 ## Next steps
 
