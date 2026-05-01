@@ -30,10 +30,12 @@ jobs:
           else
             echo "Snap install failed, falling back to GitHub release"
 
-            latest=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest \
-              | grep browser_download_url \
-              | grep Linux-64bit.tar.gz \
-              | cut -d '"' -f 4)
+          latest=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest \
+            | grep browser_download_url \
+            | grep 'hugo_[0-9].*_Linux-64bit.tar.gz' \
+            | grep -v extended \
+            | grep -v deploy \
+            | cut -d '"' -f 4)
 
             echo "Downloading: $latest"
             curl -L "$latest" -o hugo.tar.gz
