@@ -189,8 +189,8 @@ On my PC, running Peter Monta's `acquire-gps-l1.py` for all 32 PRNs takes around
 
 1. Porting the resampler to the GPU: In this post I wanted to focus on the doppler and code delay part. In the next post I will port the resampler to the GPU and time it.
 
-2. Batching the PRN search: Instead of one call to `search` per PRN, it would be interesting to try and batch multiple PRN searches and do them in one call. Perhaps one call to cuFFT with a large array is faster than several calls with smaller arrays. It needs to be tested, I'm not an expert on the optimizations of  cuFFT.
+2. Batching the PRN search: Instead of one call to `search` per PRN, it would be interesting to try and batch multiple PRN searches and do them in one call. Perhaps one call to cuFFT with a large array is faster than several calls with smaller arrays. It needs to be tested, I'm not an expert on the optimizations of cuFFT.
 
-3. Dive deeper in the retrieval of data from GPU to CPU: when printing the acquisition results at the end, they are moved from the GPU to the CPU. This triggers a `cudaMemcpyAsync` of more than 150 ms, which I reckon is humongous for the little amount of data that is actually being moved.
+3. Dive deeper in the retrieval of data from GPU to CPU: when printing the acquisition results at the end, they are moved from the GPU to the CPU. This triggers a `cudaMemcpyAsync` of more than 150 ms, which I reckon is humongous for the little amount of data that is actually being moved. Perhaps some fixed memory pool for result retrival can be made.
 
 ![GPU to CPU copy of the acquisition results](gpu2cpu_results_prof.png)
