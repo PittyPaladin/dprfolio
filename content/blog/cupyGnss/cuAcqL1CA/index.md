@@ -187,7 +187,7 @@ On my PC, running Peter Monta's `acquire-gps-l1.py` for all 32 PRNs takes around
 
 ## Next steps
 
-1. Porting the resampler to the GPU: It's not straight away because `firwin` and `filtfilt` have not, to my knowledge, been implemented in CuPy. That requires me to do it by hand from lover level CuPy calls, which takes time, and I wanted to focus on the doppler and code delay part.
+1. Porting the resampler to the GPU: In this post I wanted to focus on the doppler and code delay part. In the next post I will port the resampler to the GPU and time it.
 
 2. Batching the PRN search: Instead of one call to `search` per PRN, it would be interesting to try and batch multiple PRN searches and do them in one call. Perhaps one call to cuFFT with a large array is faster than several calls with smaller arrays. It needs to be tested, I'm not an expert on the optimizations of cuFFT.
 
