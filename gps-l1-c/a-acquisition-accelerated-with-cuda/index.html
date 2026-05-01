@@ -44,7 +44,7 @@
   <meta itemprop="description" content="Article explaining how I ported the GPS L1 C/A acquisition from GNSS-DSP-tools (by Peter Monta) to code that can be accelerated with an Nvidia GPU using CUDA">
   <meta itemprop="datePublished" content="2026-04-20T00:00:00+00:00">
   <meta itemprop="dateModified" content="2026-04-20T00:00:00+00:00">
-  <meta itemprop="wordCount" content="2499">
+  <meta itemprop="wordCount" content="2483">
   <meta itemprop="image" content="https://PittyPaladin.github.io/dprfolio/images/share.png">
   <meta itemprop="keywords" content="GNSS,GPS L1 C/A,RF,Acquisiton,CUDA,NVIDIA">
 <meta name="referrer" content="no-referrer-when-downgrade" />
@@ -380,10 +380,10 @@
 <h2 id="next-steps">Next steps</h2>
 <ol>
 <li>
-<p>Porting the resampler to the GPU: It&rsquo;s not straight away because <code>firwin</code> and <code>filtfilt</code> have not, to my knowledge, been implemented in CuPy. That requires me to do it by hand from lover level CuPy calls, which takes time, and I wanted to focus on the doppler and code delay part.</p>
+<p>Porting the resampler to the GPU: In this post I wanted to focus on the doppler and code delay part. In the next post I will port the resampler to the GPU and time it.</p>
 </li>
 <li>
-<p>Batching the PRN search: Instead of one call to <code>search</code> per PRN, it would be interesting to try and batch multiple PRN searches and do them in one call. Perhaps one call to cuFFT with a large array is faster than several calls with smaller arrays. It needs to be tested, I&rsquo;m not an expert on the optimizations of cuFFT.</p>
+<p>Batching the PRN search: Instead of one call to <code>search</code> per PRN, it would be interesting to try and batch multiple PRN searches and do them in one call. Perhaps one call to cuFFT with a large array is faster than several calls with smaller arrays. It needs to be tested, I&rsquo;m not an expert on the optimizations of  cuFFT.</p>
 </li>
 <li>
 <p>Dive deeper in the retrieval of data from GPU to CPU: when printing the acquisition results at the end, they are moved from the GPU to the CPU. This triggers a <code>cudaMemcpyAsync</code> of more than 150 ms, which I reckon is humongous for the little amount of data that is actually being moved.</p>
