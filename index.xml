@@ -7,7 +7,7 @@
     <generator>Hugo</generator>
     <language>en-US</language>
     <copyright>Copyright © 2026, David Pérez Ruiz.</copyright>
-    <lastBuildDate>Mon, 20 Apr 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 03 Mar 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://PittyPaladin.github.io/dprfolio/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>About</title>
@@ -15,13 +15,6 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://PittyPaladin.github.io/dprfolio/about/</guid>
       <description>&lt;h2 id=&#34;who-am-i&#34;&gt;Who am I?&lt;/h2&gt;&#xA;&lt;div class=&#34;bio&#34;&gt;&#xA;  &lt;img src=&#34;https://PittyPaladin.github.io/dprfolio/images/me.png&#34; alt=&#34;Photo of me&#34; class=&#34;bio-photo&#34;&gt;&#xA;  &lt;div class=&#34;bio-text&#34;&gt;&lt;p&gt;I&amp;rsquo;m David Pérez, an engineer living in the beautiful city of Barcelona, Spain. I hold a BSc in Aerospace Engineering and a MSc in Automatic Control, both from the &lt;a href=&#34;https://www.upc.edu/en&#34;&gt;Polytechnic University of Catalonia&lt;/a&gt;. I have some experience in Computer Vision (both Deep Learning and traditional), but most of my career has been revolving the different technical layers that compose modern Satellite Navigation Receivers, aka &lt;a href=&#34;https://en.wikipedia.org/wiki/Satellite_navigation&#34;&gt;GNSS&lt;/a&gt;.&lt;/p&gt;&#xA;&lt;p&gt;That includes embedded software running on real-time systems; integrating third-party sensors, like commercial GNSS receivers and inertial sensors; sensor fusion; and raw satellite RF measurement and data extraction.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>GPS L1 C/A Acquisition accelerated with CUDA</title>
-      <link>https://PittyPaladin.github.io/dprfolio/gps-l1-c/a-acquisition-accelerated-with-cuda/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>https://PittyPaladin.github.io/dprfolio/gps-l1-c/a-acquisition-accelerated-with-cuda/</guid>
-      <description>&lt;h2 id=&#34;motivation&#34;&gt;Motivation&lt;/h2&gt;&#xA;&lt;p&gt;The other day I was reading Daniel Estévez&amp;rsquo;s &lt;a href=&#34;https://destevez.net/2025/12/first-analysis-of-the-lunar-gnss-receiver-experiment-data/&#34;&gt;post&lt;/a&gt; about the &lt;a href=&#34;https://etd.gsfc.nasa.gov/our-work/lunar-gnss-receiver-experiment-lugre/&#34;&gt;Lunar GNSS Receiver Experiment (LuGRE)&lt;/a&gt;, which is a project where NASA and the Italian Space Agency landed a GPS receiver on the moon. The receiver is also capable of recording, so in his post Daniel takes the IQ recordings and codes a CUDA-accelerated script to acquire the GPS satellites with high sensitivity. He goes on to explain the acquisition algorithm, the implementation and discusses the results. As per usual, it&amp;rsquo;s very well written, I suggest you check it out.&lt;/p&gt;</description>
     </item>
     <item>
       <title>A driver for the Ublox M9: Operational mode</title>
